@@ -6,11 +6,9 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.ui.graphics.BlendMode.Companion.Screen
 import com.celvine.deb.esail.bby.common.theme.BgColorNew
 import com.celvine.deb.esail.bby.common.theme.ButtonColor
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -22,11 +20,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -71,15 +67,15 @@ fun OnBoardingScreen2(navController: NavController) {
                         LazyVerticalGrid(columns = GridCells.Fixed(4)) {
                             items(9) { index ->
                                 val imageResId = when (index) {
-                                    0 -> R.drawable.milk
-                                    1 -> R.drawable.cheese
-                                    2 -> R.drawable.pork
-                                    3 -> R.drawable.egg
-                                    4 -> R.drawable.shrimp
-                                    5 -> R.drawable.almond
-                                    6 -> R.drawable.peanuts
-                                    7 -> R.drawable.soy
-                                    8 -> R.drawable.fish
+                                    0 -> R.drawable.milk_icon
+                                    1 -> R.drawable.cheese_icon
+                                    2 -> R.drawable.pork_icon
+                                    3 -> R.drawable.egg_icon
+                                    4 -> R.drawable.shrimp_icon
+                                    5 -> R.drawable.almond_icon
+                                    6 -> R.drawable.peanut_icon
+                                    7 -> R.drawable.soy_icon
+                                    8 -> R.drawable.fish_icon
                                     else -> R.drawable.duck
                                 }
                                 val isSelected = remember { mutableStateOf(false) }

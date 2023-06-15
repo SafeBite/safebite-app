@@ -20,6 +20,7 @@ import androidx.navigation.navArgument
 import com.celvine.deb.esail.bby.data.model.UserResponse
 import com.celvine.deb.esail.bby.data.viewmodels.LoginViewModel
 import com.celvine.deb.esail.bby.data.viewmodels.RegisterViewModel
+import com.celvine.deb.esail.bby.data.viewmodels.ScanFoodViewModel
 import com.celvine.deb.esail.bby.presentation.components.*
 import com.celvine.deb.esail.bby.route.Routes
 import com.celvine.deb.esail.bby.ui.components.*
@@ -29,6 +30,7 @@ import com.celvine.deb.esail.bby.ui.components.*
 fun DashboardScreen(navController: NavHostController = rememberNavController(), context: Context) {
 
     val loginViewModel = remember { LoginViewModel(context) }
+    val scanFoodViewModel = remember { ScanFoodViewModel(context) }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
@@ -54,7 +56,7 @@ fun DashboardScreen(navController: NavHostController = rememberNavController(), 
                 WishlistScreen(navController = navController, paddingValues = paddingValues)
             }
             composable(Routes.ScanFood.routes) {
-                ScanFoodScreen(navController = navController)
+                ScanFoodScreen(navController = navController, scanFoodViewModel = scanFoodViewModel)
             }
             composable(Routes.MyCourse.routes) {
                 MyCoursesScreen(navController = navController, paddingValues = paddingValues)

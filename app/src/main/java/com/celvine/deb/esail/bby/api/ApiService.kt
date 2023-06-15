@@ -1,9 +1,13 @@
 package com.celvine.deb.esail.bby.api
 
 import com.celvine.deb.esail.bby.data.model.AccountVerificationOTP
+import com.celvine.deb.esail.bby.data.model.FoodDetailResponse
+import com.celvine.deb.esail.bby.data.model.FoodResponse
+import com.celvine.deb.esail.bby.data.model.IngredientsResponse
 import com.celvine.deb.esail.bby.data.model.LoginData
 import com.celvine.deb.esail.bby.data.model.LoginResponse
 import com.celvine.deb.esail.bby.data.model.LogoutResponse
+import com.celvine.deb.esail.bby.data.model.PredictionResponse
 import com.celvine.deb.esail.bby.data.model.ProfilePictureResponse
 import com.celvine.deb.esail.bby.data.model.ResponModel
 import com.celvine.deb.esail.bby.data.model.UserResponse
@@ -50,14 +54,22 @@ interface ApiService {
     ): Call<ProfilePictureResponse>
 
     @GET("foods/ingredients")
-    fun getIngredients(@Header("Authorization") token: String): Call<UserResponse>
+    fun getIngredients(@Header("Authorization") token: String): Call<IngredientsResponse>
 
     @GET("foods")
-    fun getFoods(@Header("Authorization") token: String): Call<UserResponse>
+    fun getFoods(@Header("Authorization") token: String): Call<FoodResponse>
 
     @GET("foods/{id}")
-    fun getFoodAllergic(@Header("Authorization") token: String): Call<UserResponse>
+    fun getFoodAllergic(@Header("Authorization") token: String): Call<FoodDetailResponse>
 
     @POST("users/logout")
     fun logout(@Header("Authorization") token: String): Call<LogoutResponse>
+
+    @Multipart
+    @POST("users/profile/upload")
+    fun predictFood(
+        @Header("Authorization") token: String,
+        @Part file: MultipartBody.Part
+    ): Call<PredictionResponse>
+
 }

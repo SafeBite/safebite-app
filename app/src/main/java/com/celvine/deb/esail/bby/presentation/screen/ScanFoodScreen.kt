@@ -3,7 +3,12 @@ package com.celvine.deb.esail.bby.presentation.screen
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.ImageDecoder
 import android.net.Uri
+import android.os.Build
+import android.provider.MediaStore
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -41,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.BlendMode.Companion.Screen
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.key.Key.Companion.Button3
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -61,6 +67,7 @@ import com.celvine.deb.esail.bby.common.theme.ButtonColor
 import com.celvine.deb.esail.bby.common.theme.DarkGreen
 import com.celvine.deb.esail.bby.common.theme.White
 import com.celvine.deb.esail.bby.data.viewmodels.LoginViewModel
+import com.celvine.deb.esail.bby.data.viewmodels.ScanFoodViewModel
 import com.celvine.deb.esail.bby.route.Routes
 import java.io.File
 import java.text.SimpleDateFormat
@@ -69,7 +76,7 @@ import java.util.Objects
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun ScanFoodScreen(navController: NavController) {
+fun ScanFoodScreen(navController: NavController, scanFoodViewModel: ScanFoodViewModel) {
 
     fun Context.createImageFile(): File {
         // Create an image file name
@@ -83,6 +90,13 @@ fun ScanFoodScreen(navController: NavController) {
         return image
     }
 
+    var imageUri by remember {
+        mutableStateOf<Uri?>(null)
+    }
+
+    val bitmap =  remember {
+        mutableStateOf<Bitmap?>(null)
+    }
     val context = LocalContext.current
     val file = context.createImageFile()
     val uri = FileProvider.getUriForFile(
@@ -92,6 +106,11 @@ fun ScanFoodScreen(navController: NavController) {
 
     var capturedImageUri by remember {
         mutableStateOf<Uri>(Uri.EMPTY)
+    }
+
+    val launcher = rememberLauncherForActivityResult(contract =
+    ActivityResultContracts.GetContent()) { uri: Uri? ->
+        imageUri = uri
     }
 
     val cameraLauncher =
@@ -107,6 +126,17 @@ fun ScanFoodScreen(navController: NavController) {
             cameraLauncher.launch(uri)
         } else {
             Toast.makeText(context, "Permission Denied", Toast.LENGTH_SHORT).show()
+        }
+    }
+    imageUri?.let {
+        if (Build.VERSION.SDK_INT < 28) {
+            bitmap.value = MediaStore.Images
+                .Media.getBitmap(context.contentResolver,it)
+
+        } else {
+            val source = ImageDecoder
+                .createSource(context.contentResolver,it)
+            bitmap.value = ImageDecoder.decodeBitmap(source)
         }
     }
 
@@ -143,14 +173,21 @@ fun ScanFoodScreen(navController: NavController) {
                             contentDescription = null,
                             contentScale = ContentScale.Crop
                         )
+                    } else if(bitmap.value != null) {
+                        bitmap.value?.let {  btm ->
+                            Image(bitmap = btm.asImageBitmap(),
+                                contentDescription =null,
+                                modifier = Modifier
+                                    .padding(16.dp)
+                                    .size(250.dp))
+                        }
                     } else {
                         Image(
                             painter = painterResource(id = R.drawable.iv_image),
                             contentDescription = null,
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
-                                .size(300.dp),
-
+                                .size(300.dp)
                             )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
@@ -170,11 +207,8 @@ fun ScanFoodScreen(navController: NavController) {
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Button(
-                    onClick = { navController.navigate(Routes.Dashboard.routes) {
-                        popUpTo(Routes.OnBoarding1.routes) {
-                            inclusive = true
-                        }
-                    }},
+                    onClick = {
+                        launcher.launch("image/*")},
                     modifier = Modifier
                         .shadow(5.dp, shape = CircleShape)
                         .weight(1f),
@@ -209,10 +243,21 @@ fun ScanFoodScreen(navController: NavController) {
                     .padding(top = 16.dp)
             ) {
                 Button(
-                    onClick = { navController.navigate(Routes.OnBoarding2.routes) {
-                        popUpTo(Routes.OnBoarding1.routes) {
-                            inclusive = true
-                        }
+                    onClick = {  if (imageUri != null) {
+                        scanFoodViewModel.scanFood(
+                            imageUri!!,
+                            onSuccess = {
+                                // OTP verification successful, proceed with login
+                                Log.d("Scan", "Scan success")
+                            },
+                            onError = { errorMessage ->
+                                // Handle OTP verification error
+                                // Show an error message or perform any other action
+                            }
+                        )
+                    } else {
+                        // Handle case when imageUri is null
+                        Toast.makeText(context, "Please select an image", Toast.LENGTH_SHORT).show()
                     }},
                     modifier = Modifier
                         .shadow(5.dp, shape = CircleShape)
