@@ -1,0 +1,26 @@
+package com.celvine.deb.esail.bby.common.theme
+
+import androidx.compose.ui.graphics.Color
+
+var HonoluluBlue = Color(0xFF0961F5)
+var DodgerBlue = Color(0xFF0496FF)
+var DodgerBlueShade = Color(0xFF1da1ff)
+var MaximumYellowRed = Color(0xFFFFBC42)
+var Ruby = Color(0xFFD81159)
+var QuinacridoneMagenta = Color(0xFF8F2D56)
+var SoftGray = Color(0xFFe1e5f2)
+var SoftGray2 = Color(0xFFc0d6df)
+var White = Color(0xFFFFFFFF)
+var White2 = Color(0xFFf6f8fd)
+var Dark = Color(0xFF003049)
+var Transparant = Color(0xFFFFFF)
+var IceBlue = Color(0xFFc6cfe3)
+var Green = Color(0xFF29bf12)
+val BgColor = Color(0xFFf7f8f8)
+val BgColorNew = Color(0xFFFFAF8F3)
+val ButtonColor = Color(0xFFF1A25C)
+val GreenNew = Color(0xFFACBB6E)
+val DarkGreen = Color(0xFF798177)
+val Primary = Color(0xFF92A3FD)
+val Secondary = Color(0xFF9DCEFF)
+val TextColor = Color(0xFF1D1617)

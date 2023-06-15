@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="DodgerBlue">#0496FF</color>
+    <color name="colorPrimary">#92A3FD</color>
+    <color name="colorSecondary">#9DCEFF</color>
+    <color name="colorText">#1D1617</color>
+    <color name="colorAccent">#C58BF2</color>
+    <color name="colorWhite">#FFFFFFFF</color>
+    <color name="colorGray">#7B6F72</color>
+    <color name="colorBgFieldText">#F7F8F8</color>
+    <color name="bgColorNew">#FFFAF8F3</color>
+</resources>
