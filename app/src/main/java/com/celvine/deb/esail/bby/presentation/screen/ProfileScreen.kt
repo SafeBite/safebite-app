@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import coil.compose.rememberAsyncImagePainter
 import coil.compose.rememberImagePainter
 import coil.request.ImageRequest
 import com.celvine.deb.esail.bby.R
@@ -190,12 +191,13 @@ fun ProfileScreen(navController: NavController, loginViewModel: LoginViewModel) 
 fun ImageProfile(userResponse: UserResponse, loginViewModel: LoginViewModel) {
     val imageUri = remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
-    val painter: Painter = rememberImagePainter(
-        data = if (imageUri.value.isEmpty()) imageUri.value else userResponse.data.avatar,
-        builder = {
-            crossfade(true)
-            placeholder(R.drawable.profile)
-        }
+    val painter: Painter = rememberAsyncImagePainter(
+        ImageRequest.Builder(LocalContext.current)
+            .data(data = if (imageUri.value.isEmpty()) imageUri.value else userResponse.data.avatar)
+            .apply(block = fun ImageRequest.Builder.() {
+                crossfade(true)
+                placeholder(R.drawable.profile)
+            }).build()
     )
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()

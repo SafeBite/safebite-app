@@ -2,7 +2,7 @@ package com.celvine.deb.esail.bby.data.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.celvine.deb.esail.bby.data.repositories.CartRepository
+import com.celvine.deb.esail.bby.presentation.repositories.CartRepository
 
 class ViewModelCartListFactory(private val repository: CartRepository) :
     ViewModelProvider.NewInstanceFactory() {

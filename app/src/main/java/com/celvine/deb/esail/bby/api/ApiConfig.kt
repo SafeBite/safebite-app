@@ -15,10 +15,11 @@ object ApiConfig {
             val gson = GsonBuilder()
                     .setLenient()
                     .create()
-            val interceptor = HttpLoggingInterceptor()
-            interceptor.level = HttpLoggingInterceptor.Level.BODY
+            val loggingInterceptor = HttpLoggingInterceptor()
+            loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
+
             val client: OkHttpClient = OkHttpClient.Builder()
-                    .addInterceptor(interceptor)
+                    .addInterceptor(loggingInterceptor)
                     .connectTimeout(40, TimeUnit.SECONDS)
                     .readTimeout(40, TimeUnit.SECONDS)
                     .writeTimeout(40, TimeUnit.SECONDS)

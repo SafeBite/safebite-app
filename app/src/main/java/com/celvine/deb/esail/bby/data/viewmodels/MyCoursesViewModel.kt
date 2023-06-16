@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.celvine.deb.esail.bby.common.MyCoursesState
 import com.celvine.deb.esail.bby.common.UiState
-import com.celvine.deb.esail.bby.data.repositories.CartRepository
-import com.celvine.deb.esail.bby.data.repositories.MyCoursesRepository
+import com.celvine.deb.esail.bby.presentation.repositories.CartRepository
+import com.celvine.deb.esail.bby.presentation.repositories.MyCoursesRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch

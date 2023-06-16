@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.celvine.deb.esail.bby.common.UiState
 import com.celvine.deb.esail.bby.data.model.ContentModel
-import com.celvine.deb.esail.bby.data.repositories.ContentRepository
+import com.celvine.deb.esail.bby.presentation.repositories.ContentRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch

@@ -1,23 +1,29 @@
 package com.celvine.deb.esail.bby.data.viewmodels
 
+import ContentUriRequestBody
+import android.content.ContentResolver
 import android.content.Context
+import android.media.Image
 import android.net.Uri
-import android.provider.ContactsContract.Profile
+import android.provider.MediaStore.Images.Media
 import android.util.Log
+import androidx.core.net.toFile
 import androidx.lifecycle.ViewModel
 import com.celvine.deb.esail.bby.api.ApiConfig
 import com.celvine.deb.esail.bby.data.model.AccountVerificationOTP
-import com.celvine.deb.esail.bby.data.model.LoginData
 import com.celvine.deb.esail.bby.data.model.LoginResponse
 import com.celvine.deb.esail.bby.data.model.LogoutResponse
 import com.celvine.deb.esail.bby.data.model.ProfilePictureResponse
 import com.celvine.deb.esail.bby.data.model.ResponModel
 import com.celvine.deb.esail.bby.data.model.UserResponse
 import com.celvine.deb.esail.bby.helper.SessionManager
-import okhttp3.MediaType
+import com.celvine.deb.esail.bby.helper.uriToFile
+import okhttp3.MediaType.Companion.parse
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.asRequestBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -26,6 +32,8 @@ import java.io.File
 class LoginViewModel(context: Context) : ViewModel() {
 
     private val sessionManager: SessionManager = SessionManager(context)
+    private val contentResolver: ContentResolver = context.contentResolver
+
     var userResponse: UserResponse? = null
 
     fun login(email: String, password: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
@@ -40,7 +48,7 @@ class LoginViewModel(context: Context) : ViewModel() {
                     val responModel = response.body()
                     if (responModel != null) {
                         sessionManager.saveAuthToken(responModel.data.access.token)
-                        Log.d("token","Token: ${responModel.data.access.token}")
+                        Log.d("token", "Token: ${responModel.data.access.token}")
                     }
                     onSuccess.invoke()
                     if (responModel != null) {
@@ -92,7 +100,11 @@ class LoginViewModel(context: Context) : ViewModel() {
     }
 
     // Function to verify the activation OTP
-    fun verifyActivationOTP(data: AccountVerificationOTP, onSuccess: () -> Unit, onError: (String) -> Unit) {
+    fun verifyActivationOTP(
+        data: AccountVerificationOTP,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
         // Call the verify activation OTP API endpoint using the ApiService from ApiConfig
         val apiService = ApiConfig.instanceRetrofit
         val verifyOtpCall: Call<ResponModel> = apiService.verifyActivationOTP(data)
@@ -127,7 +139,8 @@ class LoginViewModel(context: Context) : ViewModel() {
     fun getUser(onSuccess: () -> Unit, onError: (String) -> Unit) {
 
         val apiService = ApiConfig.instanceRetrofit
-        val getUserCall: Call<UserResponse> = apiService.getUsers(token = "Bearer ${sessionManager.fetchAuthToken()}")
+        val getUserCall: Call<UserResponse> =
+            apiService.getUsers(token = "Bearer ${sessionManager.fetchAuthToken()}")
 
         getUserCall.enqueue(object : Callback<UserResponse> {
             override fun onResponse(call: Call<UserResponse>, response: Response<UserResponse>) {
@@ -153,27 +166,40 @@ class LoginViewModel(context: Context) : ViewModel() {
     }
 
     fun uploadProfilePicture(imageUri: Uri, onSuccess: () -> Unit, onError: (String) -> Unit) {
+        Log.v("uploadProfilePicture", "uploadProfilePicture called")
+        Log.v("uploadProfilePicture", "imageUri: ${imageUri}")
+
         val apiService = ApiConfig.instanceRetrofit
-        val file = File(imageUri.path) // Assuming the imageUri is a valid file URI
 
-        val requestFile: RequestBody = RequestBody.create("image/*".toMediaTypeOrNull(), file)
-        val imageBody: MultipartBody.Part = MultipartBody.Part.createFormData("file", file.name, requestFile)
-
-        val getUserCall: Call<ProfilePictureResponse> = apiService.uploadProfilePicture(
+        val fileRequestBody = ContentUriRequestBody(
+            contentResolver,
+            imageUri
+        )
+        val updateUserCall: Call<ProfilePictureResponse> = apiService.uploadProfilePicture(
             token = "Bearer ${sessionManager.fetchAuthToken()}",
-            file = imageBody
+            file = MultipartBody.Part.createFormData(
+                "file",
+                imageUri.lastPathSegment,
+                fileRequestBody
+            )
         )
 
-        getUserCall.enqueue(object : Callback<ProfilePictureResponse> {
-            override fun onResponse(call: Call<ProfilePictureResponse>, response: Response<ProfilePictureResponse>) {
+        updateUserCall.enqueue(object : Callback<ProfilePictureResponse> {
+            override fun onResponse(
+                call: Call<ProfilePictureResponse>,
+                response: Response<ProfilePictureResponse>
+            ) {
                 if (response.isSuccessful) {
                     val responModel = response.body()
                     onSuccess.invoke()
                     if (responModel != null) {
-                        Log.d("Upload Profile Picture", "Upload Profile Picture successful ${responModel.message}")
+                        Log.d(
+                            "UploadProfilePicture",
+                            "Upload Profile Picture successful ${responModel.message}"
+                        )
                     }
                 } else {
-                    Log.d("Upload Profile Picture", "Upload Profile Picture error")
+                    Log.d("UploadProfilePicture", "Upload Profile Picture error")
                 }
             }
 
@@ -181,14 +207,19 @@ class LoginViewModel(context: Context) : ViewModel() {
                 onError.invoke("Upload Profile Picture failed")
             }
         })
+
     }
 
     fun logout(onSuccess: () -> Unit, onError: (String) -> Unit) {
         val apiService = ApiConfig.instanceRetrofit
-        val logoutCall: Call<LogoutResponse> = apiService.logout(token = "Bearer ${sessionManager.fetchAuthToken()}")
+        val logoutCall: Call<LogoutResponse> =
+            apiService.logout(token = "Bearer ${sessionManager.fetchAuthToken()}")
 
         logoutCall.enqueue(object : Callback<LogoutResponse> {
-            override fun onResponse(call: Call<LogoutResponse>, response: Response<LogoutResponse>) {
+            override fun onResponse(
+                call: Call<LogoutResponse>,
+                response: Response<LogoutResponse>
+            ) {
                 if (response.isSuccessful) {
                     // Logout successful
                     onSuccess.invoke()

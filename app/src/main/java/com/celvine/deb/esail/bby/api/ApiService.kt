@@ -1,5 +1,6 @@
 package com.celvine.deb.esail.bby.api
 
+import android.media.Image
 import com.celvine.deb.esail.bby.data.model.AccountVerificationOTP
 import com.celvine.deb.esail.bby.data.model.FoodDetailResponse
 import com.celvine.deb.esail.bby.data.model.FoodResponse
@@ -12,6 +13,7 @@ import com.celvine.deb.esail.bby.data.model.ProfilePictureResponse
 import com.celvine.deb.esail.bby.data.model.ResponModel
 import com.celvine.deb.esail.bby.data.model.UserResponse
 import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.http.*
 
@@ -66,10 +68,10 @@ interface ApiService {
     fun logout(@Header("Authorization") token: String): Call<LogoutResponse>
 
     @Multipart
-    @POST("users/profile/upload")
+    @POST("foods/predict")
     fun predictFood(
         @Header("Authorization") token: String,
-        @Part file: MultipartBody.Part
+        @Part("file") file: MultipartBody.Part
     ): Call<PredictionResponse>
 
 }

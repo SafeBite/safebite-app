@@ -2,7 +2,7 @@ package com.celvine.deb.esail.bby.data.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.celvine.deb.esail.bby.data.repositories.DetailRepository
+import com.celvine.deb.esail.bby.presentation.repositories.DetailRepository
 
 class ViewModelDetailFactory(private val repository: DetailRepository) :
     ViewModelProvider.NewInstanceFactory() {

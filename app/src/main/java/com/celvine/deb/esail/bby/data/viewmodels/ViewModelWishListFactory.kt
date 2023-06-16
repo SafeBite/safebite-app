@@ -2,7 +2,7 @@ package com.celvine.deb.esail.bby.data.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.celvine.deb.esail.bby.data.repositories.WishlistRepository
+import com.celvine.deb.esail.bby.presentation.repositories.WishlistRepository
 
 class ViewModelWishListFactory(private val repository: WishlistRepository) :
     ViewModelProvider.NewInstanceFactory() {

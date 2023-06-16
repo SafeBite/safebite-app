@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.celvine.deb.esail.bby.common.UiState
 import com.celvine.deb.esail.bby.data.model.CourseModel
-import com.celvine.deb.esail.bby.data.repositories.CoursesRepository
+import com.celvine.deb.esail.bby.presentation.repositories.CoursesRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch

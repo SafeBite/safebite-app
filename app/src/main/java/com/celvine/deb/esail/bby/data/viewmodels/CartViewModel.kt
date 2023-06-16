@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.celvine.deb.esail.bby.common.CartState
 import com.celvine.deb.esail.bby.common.UiState
 import com.celvine.deb.esail.bby.data.model.CheckoutModel
-import com.celvine.deb.esail.bby.data.repositories.CartRepository
+import com.celvine.deb.esail.bby.presentation.repositories.CartRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch

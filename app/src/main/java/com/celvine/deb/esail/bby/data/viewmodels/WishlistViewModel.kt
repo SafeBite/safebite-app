@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.celvine.deb.esail.bby.common.UiState
 import com.celvine.deb.esail.bby.common.WishlistState
-import com.celvine.deb.esail.bby.data.repositories.WishlistRepository
+import com.celvine.deb.esail.bby.presentation.repositories.WishlistRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
