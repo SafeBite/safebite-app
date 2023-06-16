@@ -5,10 +5,14 @@ import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.celvine.deb.esail.bby.api.ApiConfig
+import com.celvine.deb.esail.bby.data.model.Prediction
 import com.celvine.deb.esail.bby.data.model.PredictionResponse
 import com.celvine.deb.esail.bby.data.model.ProfilePictureResponse
+import com.celvine.deb.esail.bby.data.model.UserResponse
 import com.celvine.deb.esail.bby.helper.SessionManager
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -24,7 +28,8 @@ import java.util.Date
 class ScanFoodViewModel(context: Context) : ViewModel() {
     private val sessionManager: SessionManager = SessionManager(context)
     private val contentResolver: ContentResolver = context.contentResolver
-
+    private val _responModel = mutableStateOf<PredictionResponse?>(null)
+    val responModel: State<PredictionResponse?> = _responModel
     private var photo: File? = null
     private lateinit var photoPaths: String
 
@@ -52,7 +57,7 @@ class ScanFoodViewModel(context: Context) : ViewModel() {
                     val responModel = response.body()
                     onSuccess.invoke()
                     if (responModel != null) {
-                        Log.d("Scan Food", "Scan Food successful ${responModel.message}")
+                        Log.d("Scan Food", "Scan Food successful ${responModel.data.prediction}")
                     }
                 } else {
                     Log.d("Scan Food", "Scan Food error")
@@ -64,5 +69,6 @@ class ScanFoodViewModel(context: Context) : ViewModel() {
             }
         })
     }
+
 
 }

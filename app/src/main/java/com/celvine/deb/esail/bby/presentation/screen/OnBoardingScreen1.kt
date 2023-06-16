@@ -1,6 +1,7 @@
 package com.celvine.deb.esail.bby.presentation.screen
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -40,11 +41,12 @@ import com.celvine.deb.esail.bby.R
 import com.celvine.deb.esail.bby.common.theme.BgColorNew
 import com.celvine.deb.esail.bby.common.theme.ButtonColor
 import com.celvine.deb.esail.bby.common.theme.White
+import com.celvine.deb.esail.bby.data.viewmodels.FoodViewModel
 import com.celvine.deb.esail.bby.route.Routes
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun OnBoardingScreen1(navController: NavController) {
+fun OnBoardingScreen1(navController: NavController, foodViewModel: FoodViewModel) {
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = BgColorNew
@@ -109,11 +111,22 @@ fun OnBoardingScreen1(navController: NavController) {
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Button(
-                    onClick = { navController.navigate(Routes.OnBoarding2.routes) {
-                        popUpTo(Routes.OnBoarding1.routes) {
-                            inclusive = true
-                        }
-                    }},
+                    onClick = {
+                        foodViewModel.getIngredients(
+                            onSuccess = {
+                                navController.navigate(Routes.OnBoarding2.routes) {
+                                    popUpTo(Routes.OnBoarding1.routes) {
+                                        inclusive = true
+                                    }
+                                }
+                            // OTP verification successful, proceed with login
+                            Log.d("getIngredients", "getIngredients success")
+                        },
+                            onError = { errorMessage ->
+                                // Handle OTP verification error
+                                // Show an error message or perform any other action
+                            })
+                              },
                     modifier = Modifier
                         .shadow(5.dp, shape = CircleShape)
                         .weight(1f),

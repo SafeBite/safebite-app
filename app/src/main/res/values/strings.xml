@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ESail</string>
+    <string name="app_name">SafeBite</string>
     <string name="email">Email</string>
     <string name="email_address">Email Address</string>
     <string name="phone_number">Phone Number</string>
@@ -37,4 +37,6 @@
     <string name="otp">OTP</string>
     <string name="verifyOTP">Verify OTP</string>
     <string name="search">Search Food</string>
+    <string name="bookmarks">Bookmark</string>
+    <string name="addbookmarks">Add to Bookmark</string>
 </resources>

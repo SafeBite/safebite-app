@@ -11,6 +11,8 @@ import com.celvine.deb.esail.bby.data.model.LogoutResponse
 import com.celvine.deb.esail.bby.data.model.PredictionResponse
 import com.celvine.deb.esail.bby.data.model.ProfilePictureResponse
 import com.celvine.deb.esail.bby.data.model.ResponModel
+import com.celvine.deb.esail.bby.data.model.UpdateUserProfileRespone
+import com.celvine.deb.esail.bby.data.model.UpdateUserRequest
 import com.celvine.deb.esail.bby.data.model.UserResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -56,7 +58,11 @@ interface ApiService {
     ): Call<ProfilePictureResponse>
 
     @GET("foods/ingredients")
-    fun getIngredients(@Header("Authorization") token: String): Call<IngredientsResponse>
+    fun getIngredients(
+        @Header("Authorization") token: String,
+        @Query("page") page: Int,
+        @Query("limit") limit: Int,
+        @Query("mainAlergenOnly") mainAlergenOnly: Boolean): Call<IngredientsResponse>
 
     @GET("foods")
     fun getFoods(@Header("Authorization") token: String): Call<FoodResponse>
@@ -73,5 +79,11 @@ interface ApiService {
         @Header("Authorization") token: String,
         @Part file: MultipartBody.Part
     ): Call<PredictionResponse>
+
+    @PATCH("users/profile")
+    fun updateUser(
+        @Header("Authorization") token: String,
+        @Body request: UpdateUserRequest
+    ): Call<UpdateUserProfileRespone>
 
 }

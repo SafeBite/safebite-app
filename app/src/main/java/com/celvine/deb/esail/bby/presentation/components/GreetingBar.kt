@@ -15,10 +15,12 @@ import androidx.navigation.NavController
 import com.celvine.deb.esail.bby.R
 import com.celvine.deb.esail.bby.common.theme.Dark
 import com.celvine.deb.esail.bby.common.theme.Transparant
+import com.celvine.deb.esail.bby.data.viewmodels.LoginViewModel
 import com.celvine.deb.esail.bby.route.Routes
 
 @Composable
-fun GreetingBar(navController: NavController) {
+fun GreetingBar(navController: NavController, loginViewModel: LoginViewModel) {
+
     val interactionSource = remember { MutableInteractionSource() }
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -27,7 +29,7 @@ fun GreetingBar(navController: NavController) {
     ) {
         Column {
             Text(
-                text = "Welcome Back, Agastya",
+                text = "Welcome Back, ${loginViewModel.userResponse?.data?.name}",
                 style = MaterialTheme.typography.bodyLarge.copy(
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 12.sp

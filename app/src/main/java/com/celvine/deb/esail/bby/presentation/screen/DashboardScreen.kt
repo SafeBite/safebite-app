@@ -17,10 +17,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.celvine.deb.esail.bby.data.model.PredictionResponse
 import com.celvine.deb.esail.bby.data.model.UserResponse
+import com.celvine.deb.esail.bby.data.viewmodels.FoodViewModel
 import com.celvine.deb.esail.bby.data.viewmodels.LoginViewModel
 import com.celvine.deb.esail.bby.data.viewmodels.RegisterViewModel
 import com.celvine.deb.esail.bby.data.viewmodels.ScanFoodViewModel
+import com.celvine.deb.esail.bby.data.viewmodels.SelectedPredictionViewModel
 import com.celvine.deb.esail.bby.presentation.components.*
 import com.celvine.deb.esail.bby.route.Routes
 import com.celvine.deb.esail.bby.ui.components.*
@@ -29,10 +32,14 @@ import com.celvine.deb.esail.bby.ui.components.*
 @Composable
 fun DashboardScreen(navController: NavHostController = rememberNavController(), context: Context) {
 
+    val selectedPredictionViewModel = remember { SelectedPredictionViewModel() }
     val loginViewModel = remember { LoginViewModel(context) }
+    val foodViewModel = remember { FoodViewModel(context) }
     val scanFoodViewModel = remember { ScanFoodViewModel(context) }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+    val responModel: PredictionResponse? = null
+
 
     Scaffold(bottomBar = {
         if (currentRoute != Routes.Detail.routes && currentRoute != Routes.Cart.routes && currentRoute != Routes.Search.routes && currentRoute != Routes.Profile.routes && currentRoute != Routes.OnBoarding2.routes && currentRoute != Routes.Login.routes && currentRoute != Routes.ScanFood.routes) {
@@ -41,7 +48,7 @@ fun DashboardScreen(navController: NavHostController = rememberNavController(), 
     }) { paddingValues ->
         NavHost(navController = navController, startDestination = Routes.Home.routes) {
             composable(Routes.Home.routes) {
-                HomeScreen(navController = navController, paddingValues = paddingValues)
+                HomeScreen(navController = navController, paddingValues = paddingValues, loginViewModel = loginViewModel)
             }
             composable(Routes.Search.routes) {
                 SearchScreen(navController = navController)
@@ -50,7 +57,7 @@ fun DashboardScreen(navController: NavHostController = rememberNavController(), 
                 ProfileScreen(navController = navController, loginViewModel = loginViewModel)
             }
             composable(Routes.OnBoarding2.routes) {
-                OnBoardingScreen2(navController = navController)
+                OnBoardingScreen2(navController = navController, foodViewModel = foodViewModel, loginViewModel = loginViewModel)
             }
             composable(Routes.Wishlist.routes) {
                 WishlistScreen(navController = navController, paddingValues = paddingValues)
@@ -64,6 +71,15 @@ fun DashboardScreen(navController: NavHostController = rememberNavController(), 
             composable(Routes.Login.routes) {
                 LoginScreen(navController = navController, loginViewModel = loginViewModel)
             }
+            composable(Routes.DetailAllergic.routes) {
+                DetailScreenAllergic(navController = navController, selectedPredictionViewModel = selectedPredictionViewModel, responModel = responModel)
+            }
+//            composable(Routes.DetailAllergic.routes,
+//                arguments = listOf(navArgument("id") { type = NavType.IntType })
+//            ) {
+//                val id = it.arguments?.getInt("id") ?: 0
+//                DetailScreenAllergic(navController = navController, id = id, selectedPredictionViewModel = selectedPredictionViewModel)
+//            }
             composable(
                 Routes.Detail.routes,
                 arguments = listOf(navArgument("id") { type = NavType.IntType })

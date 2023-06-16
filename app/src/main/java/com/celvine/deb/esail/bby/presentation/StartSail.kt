@@ -16,6 +16,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.celvine.deb.esail.bby.data.model.UserResponse
+import com.celvine.deb.esail.bby.data.viewmodels.FoodViewModel
 import com.celvine.deb.esail.bby.data.viewmodels.LoginViewModel
 import com.celvine.deb.esail.bby.data.viewmodels.RegisterViewModel
 import com.celvine.deb.esail.bby.presentation.screen.*
@@ -31,6 +32,7 @@ fun StartSail(
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val loginViewModel = remember { LoginViewModel(context) }
+    val foodViewModel = remember { FoodViewModel(context) }
     Scaffold { paddingValues ->
         val padding = paddingValues
         NavHost(navController = navController, startDestination = Routes.Login.routes) {
@@ -44,10 +46,10 @@ fun StartSail(
                 TokenScreen(navController = navController, loginViewModel = loginViewModel)
             }
             composable(Routes.OnBoarding1.routes) {
-                OnBoardingScreen1(navController = navController)
+                OnBoardingScreen1(navController = navController, foodViewModel= foodViewModel)
             }
             composable(Routes.OnBoarding2.routes) {
-                OnBoardingScreen2(navController = navController)
+                OnBoardingScreen2(navController = navController, foodViewModel= foodViewModel, loginViewModel = loginViewModel)
             }
             composable(Routes.Dashboard.routes) {
                 DashboardScreen(context = context)

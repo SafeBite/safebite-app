@@ -78,6 +78,10 @@ import java.util.Objects
 @Composable
 fun ScanFoodScreen(navController: NavController, scanFoodViewModel: ScanFoodViewModel) {
 
+
+    val responModel by remember(scanFoodViewModel) {
+        scanFoodViewModel.responModel }
+
     fun Context.createImageFile(): File {
         // Create an image file name
         val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
@@ -249,6 +253,7 @@ fun ScanFoodScreen(navController: NavController, scanFoodViewModel: ScanFoodView
                             onSuccess = {
                                 // OTP verification successful, proceed with login
                                 Log.d("Scan", "Scan success")
+                                navController.navigate(Routes.DetailAllergic.routes)
                             },
                             onError = { errorMessage ->
                                 // Handle OTP verification error
