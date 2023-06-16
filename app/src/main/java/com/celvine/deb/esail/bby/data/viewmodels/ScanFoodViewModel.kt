@@ -1,5 +1,7 @@
 package com.celvine.deb.esail.bby.data.viewmodels
 
+import ContentUriRequestBody
+import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
 import android.util.Log
@@ -19,23 +21,26 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 
-class ScanFoodViewModel(context: Context): ViewModel() {
+class ScanFoodViewModel(context: Context) : ViewModel() {
     private val sessionManager: SessionManager = SessionManager(context)
+    private val contentResolver: ContentResolver = context.contentResolver
+
     private var photo: File? = null
     private lateinit var photoPaths: String
 
     fun scanFood(imageUri: Uri, onSuccess: () -> Unit, onError: (String) -> Unit) {
 
         val apiService = ApiConfig.instanceRetrofit
-        val file = File(imageUri.path) // Assuming the imageUri is a valid file URI
 
-        val requestFile: RequestBody = file.asRequestBody("image/*".toMediaTypeOrNull())
-        val imageBody: MultipartBody.Part =
-            MultipartBody.Part.createFormData("file", file.name, requestFile)
+        val fileRequestBody = ContentUriRequestBody(contentResolver, imageUri)
 
         val getUserCall: Call<PredictionResponse> = apiService.predictFood(
             token = "Bearer ${sessionManager.fetchAuthToken()}",
-            file = imageBody
+            file = MultipartBody.Part.createFormData(
+                "file",
+                imageUri.lastPathSegment,
+                fileRequestBody
+            )
         )
 
         getUserCall.enqueue(object : Callback<PredictionResponse> {

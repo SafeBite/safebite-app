@@ -71,7 +71,7 @@ interface ApiService {
     @POST("foods/predict")
     fun predictFood(
         @Header("Authorization") token: String,
-        @Part("file") file: MultipartBody.Part
+        @Part file: MultipartBody.Part
     ): Call<PredictionResponse>
 
 }
