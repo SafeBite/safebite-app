@@ -5,9 +5,9 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 
 private val LightColorPalette = lightColorScheme(
-    primary = DodgerBlue,
-    primaryContainer = HonoluluBlue,
-    secondary = Ruby
+    primary = GreenNew,
+    primaryContainer = ButtonColor,
+    secondary = GreenNew
 )
 
 @Composable

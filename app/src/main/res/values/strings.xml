@@ -7,9 +7,17 @@
     <string name="password">Password</string>
     <string name="forgot_password">Forgot Password</string>
     <string name="confirm_password">Confirm Password</string>
+    <string name="dont_have_acc">Don\'t have an account?</string>
+    <string name="have_acc">Already have an account?</string>
     <string name="login">Login</string>
+    <string name="otpTitle">OTP Request</string>
     <string name="register">Register</string>
     <string name="sign_up">Sign Up</string>
+    <string name="emergency">Emergency</string>
+    <string name="scan_food">Scan Your Food</string>
+    <string name="gallery">Gallery</string>
+    <string name="camera">Camera</string>
+    <string name="food_to_avoid">Food to Avoid</string>
     <string name="sign_in">Sign In</string>
     <string name="user_name">User Name</string>
     <string name="in_dev">Feature in development</string>

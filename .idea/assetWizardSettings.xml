@@ -18,7 +18,7 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
-                                      <entry key="url" value="file:/$USER_HOME$/AppData/Local/Android/Sdk/icons/material/materialicons/image/baseline_image_24.xml" />
+                                      <entry key="url" value="file:/$PROJECT_DIR$/../../../../../../../Users/lenovo/AppData/Local/Android/Sdk/icons/material/materialicons/info/baseline_info_24.xml" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -28,7 +28,7 @@
                         </option>
                         <option name="values">
                           <map>
-                            <entry key="outputName" value="iv_image" />
+                            <entry key="outputName" value="info_ic" />
                             <entry key="sourceFile" value="C:\Tugas\Kuliah\Bangkit\Tugas\Jetpack\esail-jetpack-compose-main\esail-jetpack-compose-main" />
                           </map>
                         </option>

@@ -1,29 +1,56 @@
 package com.celvine.deb.esail.bby.helper
 
 import android.content.Context
-import android.content.SharedPreferences
-import com.celvine.deb.esail.bby.R
+import android.util.Log
 
-class SessionManager (context: Context) {
-    private var prefs: SharedPreferences = context.getSharedPreferences(context.getString(R.string.app_name), Context.MODE_PRIVATE)
+class SessionManager(context: Context) {
 
-    companion object {
-        const val USER_TOKEN = "user_token"
-    }
+    private val prefs = context.getSharedPreferences("my_prefs", Context.MODE_PRIVATE)
 
-    /**
-     * Function to save auth token
-     */
-    fun saveAuthToken(token: String) {
+    fun saveAuthToken(token: String, expiryTime: Long) {
         val editor = prefs.edit()
-        editor.putString(USER_TOKEN, token)
+        editor.putString("auth_token", token)
+        editor.putLong("expiry_time", expiryTime)
         editor.apply()
+        Log.d("SessionManager", "Saved Auth Token: $token, Expiry Time: $expiryTime")
     }
 
-    /**
-     * Function to fetch auth token
-     */
+    fun saveRefreshToken(refreshToken: String) {
+        val editor = prefs.edit()
+        editor.putString("refresh_token", refreshToken)
+        editor.apply()
+        Log.d("SessionManager", "Saved Refresh Token: $refreshToken")
+    }
+
     fun fetchAuthToken(): String? {
-        return prefs.getString(USER_TOKEN, null)
+        val token = prefs.getString("auth_token", null)
+        Log.d("SessionManager", "Fetched Auth Token: $token")
+        return token
+    }
+
+    fun fetchRefreshToken(): String? {
+        val refreshToken = prefs.getString("refresh_token", null)
+        Log.d("SessionManager", "Fetched Refresh Token: $refreshToken")
+        return refreshToken
+    }
+
+    fun fetchAccessTokenExpiry(): Long {
+        val expiryTime = prefs.getLong("expiry_time", 0)
+        Log.d("SessionManager", "Fetched Access Token Expiry Time: $expiryTime")
+        return expiryTime
+    }
+
+    fun clearSession() {
+        val editor = prefs.edit()
+        editor.remove("auth_token")
+        editor.remove("refresh_token")
+        editor.remove("expiry_time")
+        editor.apply()
+        Log.d("SessionManager", "Session cleared")
     }
 }
+
+
+
+
+

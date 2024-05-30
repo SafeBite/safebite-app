@@ -2,11 +2,11 @@ package com.celvine.deb.esail.bby.presentation.screen
 
 import android.annotation.SuppressLint
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import com.celvine.deb.esail.bby.common.theme.BgColorNew
 import com.celvine.deb.esail.bby.common.theme.ButtonColor
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -16,34 +16,36 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.celvine.deb.esail.bby.R
 import com.celvine.deb.esail.bby.common.theme.White
-import com.celvine.deb.esail.bby.data.model.AccountVerificationOTP
 import com.celvine.deb.esail.bby.data.model.UpdateUserRequest
-import com.celvine.deb.esail.bby.data.viewmodels.FoodViewModel
 import com.celvine.deb.esail.bby.data.viewmodels.LoginViewModel
+import com.celvine.deb.esail.bby.data.viewmodels.ProfileViewModel
 import com.celvine.deb.esail.bby.presentation.components.GridItem
 import com.celvine.deb.esail.bby.route.Routes
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun OnBoardingScreen2(navController: NavController, foodViewModel: FoodViewModel, loginViewModel: LoginViewModel) {
+fun OnBoardingScreen2(navController: NavController, loginViewModel: LoginViewModel, profileViewModel: ProfileViewModel) {
     LaunchedEffect(Unit) {
         loginViewModel.getUser(
             onSuccess = {
@@ -55,17 +57,19 @@ fun OnBoardingScreen2(navController: NavController, foodViewModel: FoodViewModel
                 // Show an error message or perform any other action
             })
     }
-
-    val selectedIconIds = remember { mutableStateListOf<Int>() }
+    val context = LocalContext.current
+    val customIndices = listOf(30, 31, 1, 16, 24, 114, 17, 119, 85, 18)
+    val customTexts = listOf("Milk", "Cheese", "Pork", "Egg", "Shrimp", "Almond", "Beef", "Oyster", "Fish", "Chicken")
+    var isLoading by remember { mutableStateOf(false) }  // Loading state
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(color = BgColorNew)
-            .padding(16.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(16.dp)
         ) {
             Text(
                 text = "What should you avoid?",
@@ -84,45 +88,38 @@ fun OnBoardingScreen2(navController: NavController, foodViewModel: FoodViewModel
                     Text(text = "Select one or more")
                     Spacer(modifier = Modifier.height(8.dp))
                     LazyVerticalGrid(columns = GridCells.Fixed(4)) {
-                        items(9) { index ->
+                        items(customIndices.size) { idx ->
+                            val index = customIndices[idx]
+                            val text = customTexts[idx]
                             val imageResId = when (index) {
-                                1 -> R.drawable.milk_icon
-                                2 -> R.drawable.cheese_icon
-                                3 -> R.drawable.pork_icon
-                                4 -> R.drawable.egg_icon
-                                5 -> R.drawable.shrimp_icon
-                                6 -> R.drawable.almond_icon
-                                7 -> R.drawable.peanut_icon
-                                8 -> R.drawable.soy_icon
-                                9 -> R.drawable.fish_icon
-                                else -> R.drawable.duck
+                                30 -> R.drawable.milk_icon
+                                31 -> R.drawable.cheese_icon
+                                1 -> R.drawable.pork_icon
+                                16 -> R.drawable.egg_icon
+                                24 -> R.drawable.shrimp_icon
+                                114 -> R.drawable.almond_icon
+                                17 -> R.drawable.beef_icon
+                                119 -> R.drawable.oyster
+                                85 -> R.drawable.fish_icon
+                                18 -> R.drawable.chicken
+                                else -> R.drawable.chicken
                             }
-                            val isSelected = remember { mutableStateOf(false) }
+                            val isSelected = remember { mutableStateOf(index in profileViewModel.selectedIconIds) }
                             Box(
                                 modifier = Modifier
                                     .padding(4.dp)
                                     .clickable {
+                                        isSelected.value = !isSelected.value
                                         if (isSelected.value) {
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                            selectedIconIds.add(index)
+                                            profileViewModel.addIconId(index)
                                         } else {
-                                            selectedIconIds.remove(index)
+                                            profileViewModel.removeIconId(index)
                                         }
+                                        Log.d("Selected Allergens", "Selected allergens: ${profileViewModel.selectedIconIds}")
                                     }
+
                             ) {
-                                GridItem(index = index, imageResId = imageResId, isSelected = isSelected.value)
+                                GridItem(index = index, imageResId = imageResId, isSelected = isSelected.value, text = text)
                             }
                         }
                     }
@@ -133,7 +130,7 @@ fun OnBoardingScreen2(navController: NavController, foodViewModel: FoodViewModel
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 32.dp),
+                .padding(start = 32.dp, top = 24.dp, end = 32.dp, bottom = 64.dp),
             verticalArrangement = Arrangement.Bottom
         ) {
             Row(
@@ -143,7 +140,7 @@ fun OnBoardingScreen2(navController: NavController, foodViewModel: FoodViewModel
                 Button(
                     onClick = {
                         navController.navigate(Routes.OnBoarding1.routes) {
-                            popUpTo(Routes.OnBoarding2.routes) {
+                            popUpTo(Routes.OnBoarding1.routes) {
                                 inclusive = true
                             }
                         }
@@ -158,19 +155,24 @@ fun OnBoardingScreen2(navController: NavController, foodViewModel: FoodViewModel
                 Spacer(modifier = Modifier.width(16.dp))
                 Button(
                     onClick = {
-                        val request: UpdateUserRequest = UpdateUserRequest(name = loginViewModel.userResponse?.data?.name, allergens = selectedIconIds)
-                        foodViewModel.updateUsers(request,
+                        isLoading = true
+                        val allergensList = profileViewModel.selectedIconIds
+                        Log.d("Selected Allergens", "Selected allergens: $allergensList")
+                        val request: UpdateUserRequest = UpdateUserRequest(name = loginViewModel.userResponse.value?.data?.name, allergens = allergensList)
+                        profileViewModel.updateUsers(request,
                             onSuccess = {
-                                Log.d("UpdateUser", "UpdateUser success ${loginViewModel.userResponse?.data}")
-                                navController.navigate(Routes.Dashboard.routes){
-                                    popUpTo(Routes.OnBoarding2.routes) {
+                                isLoading = false
+                                Log.d("UpdateUser", "UpdateUser success ${loginViewModel.userResponse.value?.data}")
+                                navController.navigate(Routes.Home.routes){
+                                    popUpTo(Routes.Home.routes) {
                                         inclusive = true
                                     }
                                 }
                             },
                             onError = { errorMessage ->
-                                // Handle OTP sending error
-                                // Show an error message or perform any other action
+                                isLoading = false
+                                Toast.makeText(context, "$errorMessage" +
+                                        "Try again or check your connection", Toast.LENGTH_SHORT).show()
                             })
                     },
                     modifier = Modifier
@@ -182,14 +184,19 @@ fun OnBoardingScreen2(navController: NavController, foodViewModel: FoodViewModel
                 }
             }
         }
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.2f)),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(64.dp),
+                    color = MaterialTheme.colorScheme.secondary,
+                    strokeWidth = 4.dp
+                )
+            }
+        }
     }
 }
-
-
-//@OptIn(ExperimentalFoundationApi::class)
-//@Preview
-//@Composable
-//fun OnBoardingScreen2Preview() {
-//    val navController = rememberNavController() // Create a mock NavController instance
-//    OnBoardingScreen2(navController = navController)
-//}

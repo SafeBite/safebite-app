@@ -8,11 +8,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.celvine.deb.esail.bby.api.ApiConfig
 import com.celvine.deb.esail.bby.common.theme.ESailTheme
+import com.celvine.deb.esail.bby.presentation.MainNavHost
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        ApiConfig.initialize(this)
         installSplashScreen()
         setContent {
             ESailTheme {
@@ -20,7 +23,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    StartSail(context = this@MainActivity)
+                    MainNavHost(context = this@MainActivity)
                 }
             }
         }

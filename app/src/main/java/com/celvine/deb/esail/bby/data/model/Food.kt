@@ -5,5 +5,5 @@ data class Food(
     val name: String,
     val picture: String,
     val externalId: String,
-    val mainAlergen: List<MainAlergen>
+    val ingredients: List<Ingredients>
 )

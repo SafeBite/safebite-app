@@ -6,7 +6,7 @@ data class Prediction(
     val picture: String,
     val externalId: String?,
     val description: String?,
-    val ingredients: List<String>,
-    val alergic: List<String>,
+    val ingredients: List<Ingredient>,
+    val alergic: List<Alergic>,
     val probability: Double
 )

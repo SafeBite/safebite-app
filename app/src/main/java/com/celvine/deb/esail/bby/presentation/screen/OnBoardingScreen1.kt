@@ -1,8 +1,6 @@
 package com.celvine.deb.esail.bby.presentation.screen
 
 import android.annotation.SuppressLint
-import android.util.Log
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -25,16 +23,12 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.BlendMode.Companion.Screen
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.key.Key.Companion.Button3
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.celvine.deb.esail.bby.R
@@ -97,10 +91,7 @@ fun OnBoardingScreen1(navController: NavController, foodViewModel: FoodViewModel
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Button(
-                    onClick = { navController.navigate(Routes.Dashboard.routes) {
-                        popUpTo(Routes.OnBoarding1.routes) {
-                            inclusive = true
-                        }
+                    onClick = { navController.navigate(Routes.Home.routes) {
                     }},
                     modifier = Modifier
                         .shadow(5.dp, shape = CircleShape)
@@ -112,20 +103,8 @@ fun OnBoardingScreen1(navController: NavController, foodViewModel: FoodViewModel
                 Spacer(modifier = Modifier.width(16.dp))
                 Button(
                     onClick = {
-                        foodViewModel.getIngredients(
-                            onSuccess = {
-                                navController.navigate(Routes.OnBoarding2.routes) {
-                                    popUpTo(Routes.OnBoarding1.routes) {
-                                        inclusive = true
-                                    }
-                                }
-                            // OTP verification successful, proceed with login
-                            Log.d("getIngredients", "getIngredients success")
-                        },
-                            onError = { errorMessage ->
-                                // Handle OTP verification error
-                                // Show an error message or perform any other action
-                            })
+                        navController.navigate(Routes.OnBoarding2.routes) {
+                        }
                               },
                     modifier = Modifier
                         .shadow(5.dp, shape = CircleShape)
@@ -136,13 +115,8 @@ fun OnBoardingScreen1(navController: NavController, foodViewModel: FoodViewModel
                 }
             }
         }
+
     }
 }
 
-//@ExperimentalAnimationApi
-//@Preview
-//@Composable
-//fun OnBoardingScreen1Preview() {
-//    OnBoardingScreen1()
-//}
 

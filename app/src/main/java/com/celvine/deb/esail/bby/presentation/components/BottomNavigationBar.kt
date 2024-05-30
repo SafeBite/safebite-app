@@ -14,9 +14,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.celvine.deb.esail.bby.common.theme.ButtonColor
-import com.celvine.deb.esail.bby.common.theme.DodgerBlue
-import com.celvine.deb.esail.bby.common.theme.DodgerBlueShade
-import com.celvine.deb.esail.bby.common.theme.IceBlue
 import com.celvine.deb.esail.bby.common.theme.White
 import com.celvine.deb.esail.bby.route.NavigationItem
 
@@ -25,22 +22,23 @@ fun BottomNavigationBar(navController: NavController) {
     val items = listOf(
         NavigationItem.Home,
         NavigationItem.ScanFood,
-        NavigationItem.Wishlist,
+        NavigationItem.Emergency
     )
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    NavigationBar(containerColor = White, contentColor = DodgerBlue) {
+    NavigationBar(containerColor = White, contentColor = ButtonColor) {
         items.forEach { item ->
             NavigationBarItem(
                 selected = currentRoute == item.route,
                 onClick = {
                     navController.navigate(item.route) {
-                        navController.graph.startDestinationRoute?.let { route ->
-                            popUpTo(route) {
-                                saveState = true
-                            }
-                        }
+                        // Handle navigation based on current destination
+//                        if (currentRoute != null) {
+//                            popUpTo(navController.graph.startDestinationId) {
+//                                inclusive = false // Do not include the start destination
+//                            }
+//                        }
                         launchSingleTop = true
                         restoreState = true
                     }

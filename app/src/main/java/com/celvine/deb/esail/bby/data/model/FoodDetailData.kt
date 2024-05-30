@@ -7,5 +7,6 @@ data class FoodDetailData(
     val externalId: String,
     val description: String,
     val alergic: List<Alergic>,
-    val ingredients: List<Ingredients>
+    val ingredients: List<Ingredients>,
+    val probability: Long
 )

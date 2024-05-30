@@ -1,8 +1,6 @@
 package com.celvine.deb.esail.bby.presentation.screen
 
-import User
 import android.net.Uri
-import android.service.autofill.UserData
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -17,10 +15,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,31 +29,27 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
-import coil.compose.rememberImagePainter
 import coil.request.ImageRequest
 import com.celvine.deb.esail.bby.R
 import com.celvine.deb.esail.bby.common.theme.*
-import com.celvine.deb.esail.bby.data.model.ProfileItemModel
 import com.celvine.deb.esail.bby.data.model.UserResponse
-import com.celvine.deb.esail.bby.data.sources.ProfileItem
 import com.celvine.deb.esail.bby.data.viewmodels.LoginViewModel
 import com.celvine.deb.esail.bby.route.Routes
-import retrofit2.http.Body
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(navController: NavController, loginViewModel: LoginViewModel) {
+
+    var isLoading by remember { mutableStateOf(false) }  // Loading state
     LaunchedEffect(Unit) {
         loginViewModel.getUser(
             onSuccess = {
             // Login successful, navigate to TokenScreen
-            Log.d("login", "login success")
+            Log.d("Get User", "Get User Success")
         },
             onError = { errorMessage ->
                 // Handle login error
@@ -75,14 +70,13 @@ fun ProfileScreen(navController: NavController, loginViewModel: LoginViewModel) 
                     .background(color = BgColorNew)
             ) {
                 item {
-                    Header(loginViewModel.userResponse, loginViewModel)
-//                Body()
+                    Header(loginViewModel.userResponse.value, loginViewModel)
                     val context = LocalContext.current
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                navController.navigate(Routes.OnBoarding2.routes) {
+                                navController.navigate(Routes.ChangeAllergenScreen.routes) {
                                 }
                             }
                             .padding(horizontal = 20.dp, vertical = 15.dp),
@@ -117,58 +111,27 @@ fun ProfileScreen(navController: NavController, loginViewModel: LoginViewModel) 
                     }
 
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                Toast.makeText(context, "Featured Development", Toast.LENGTH_SHORT).show()
-                            }
-                            .padding(horizontal = 20.dp, vertical = 15.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row {
-                            Icon(
-                                modifier = Modifier
-                                    .width(20.dp)
-                                    .height(20.dp),
-                                painter = painterResource(id = R.drawable.earth_asia),
-                                contentDescription = "Icon",
-                                tint = SoftGray2
-                            )
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text(
-                                text = "Language",
-                                style = MaterialTheme.typography.bodyMedium.copy(
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                            )
-                        }
-                        Icon(
-                            modifier = Modifier
-                                .width(20.dp)
-                                .height(20.dp),
-                            painter = painterResource(id = R.drawable.ic_baseline_keyboard_arrow_right_24),
-                            contentDescription = "Icon"
-                        )
-                    }
-
-                    Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center
                     ) {
-                        TextButton(onClick = { loginViewModel.logout(
-                            onSuccess = {
-                                navController.navigate(Routes.Login.routes) {
-                                    popUpTo(Routes.Home.routes) {
-                                        inclusive = true
-                                    }
-                                }
-                                Log.d("Logout", "Logout Success")
-                            },
-                            onError = { errorMessage ->
-                                // Handle logout error, show an error message or perform any other action
-                                Log.d("Logout", "Logout error")
+                        TextButton(
+                            onClick = {
+                                isLoading = true
+                                loginViewModel.logout(
+                                    onSuccess = {
+                                        isLoading = false
+                                        navController.navigate(Routes.Login.routes) {
+                                            popUpTo(Routes.Login.routes) {
+                                                inclusive = true
+                                            }
+                                        }
+                                        Log.d("Logout", "Logout Success")
+                                    },
+                                    onError = { errorMessage ->
+                                        isLoading = false
+                                        Toast.makeText(context, "$errorMessage" +
+                                                "Try again or check your connection", Toast.LENGTH_SHORT).show()
+                                        Log.d("Logout", "Logout error")
                             }
                         ) }) {
                             Text(
@@ -182,6 +145,20 @@ fun ProfileScreen(navController: NavController, loginViewModel: LoginViewModel) 
                     }
                 }
             }
+            if (isLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.2f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(64.dp),
+                        color = MaterialTheme.colorScheme.secondary,
+                        strokeWidth = 4.dp
+                    )
+                }
+            }
         }
     }
 }
@@ -193,12 +170,27 @@ fun ImageProfile(userResponse: UserResponse, loginViewModel: LoginViewModel) {
     val coroutineScope = rememberCoroutineScope()
     val painter: Painter = rememberAsyncImagePainter(
         ImageRequest.Builder(LocalContext.current)
-            .data(data = if (imageUri.value.isEmpty()) imageUri.value else userResponse.data.avatar)
-            .apply(block = fun ImageRequest.Builder.() {
+            .data(
+                if (imageUri.value.isEmpty()) {
+                    R.drawable.profile // Use placeholder drawable
+                } else {
+                    userResponse.data.avatar // Use user's avatar
+                }
+            )
+            .apply {
                 crossfade(true)
-                placeholder(R.drawable.profile)
-            }).build()
+            }
+            .build()
     )
+
+//    val painter: Painter = rememberAsyncImagePainter(
+//        ImageRequest.Builder(LocalContext.current)
+//            .data(data = if (imageUri.value.isEmpty()) imageUri.value else userResponse.data.avatar)
+//            .apply(block = fun ImageRequest.Builder.() {
+//                crossfade(true)
+//                placeholder(R.drawable.profile)
+//            }).build()
+//    )
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -221,57 +213,6 @@ fun ImageProfile(userResponse: UserResponse, loginViewModel: LoginViewModel) {
             contentDescription = "Image Profile",
             contentScale = ContentScale.Crop,
             modifier = Modifier.size(120.dp)
-        )
-    }
-}
-
-
-
-
-@Composable
-fun ItemMenuProfile(item: ProfileItemModel, navController: NavController) {
-    val context = LocalContext.current
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable {
-                when (item.Id) {
-                    1 -> navController.navigate(Routes.OnBoarding2.routes) {
-                        popUpTo(Routes.Profile.routes) {
-                            inclusive = true
-                        }
-                    }
-                    2 -> Toast.makeText(context, "Clicked item with ID 2", Toast.LENGTH_SHORT).show()
-                }
-            }
-            .padding(horizontal = 20.dp, vertical = 15.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Row {
-            Icon(
-                modifier = Modifier
-                    .width(20.dp)
-                    .height(20.dp),
-                painter = painterResource(id = item.Icon),
-                contentDescription = "Icon",
-                tint = SoftGray2
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-            Text(
-                text = item.Label,
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-            )
-        }
-        Icon(
-            modifier = Modifier
-                .width(20.dp)
-                .height(20.dp),
-            painter = painterResource(id = R.drawable.ic_baseline_keyboard_arrow_right_24),
-            contentDescription = "Icon"
         )
     }
 }
@@ -305,19 +246,6 @@ fun Header(userResponse: UserResponse?, loginViewModel: LoginViewModel) {
                     fontSize = 12.sp
                 )
             )
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun Body() {
-    val navController = rememberNavController()
-    Column(modifier = Modifier.padding(20.dp)) {
-        Card(colors = CardDefaults.cardColors(containerColor = White)) {
-            ProfileItem.data.forEach { item ->
-                ItemMenuProfile(item = item, navController = navController)
-            }
         }
     }
 }
