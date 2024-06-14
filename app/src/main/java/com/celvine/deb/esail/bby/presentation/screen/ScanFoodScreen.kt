@@ -69,6 +69,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
 import java.util.Objects
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
@@ -104,7 +105,6 @@ fun ScanFoodScreen(navController: NavController, scanFoodViewModel: ScanFoodView
     var capturedImageUri by remember {
         mutableStateOf<Uri>(Uri.EMPTY)
     }
-    // Function to request storage permissions
 
     val launcher = rememberLauncherForActivityResult(contract =
     ActivityResultContracts.GetContent()) { uri: Uri? ->
@@ -115,7 +115,7 @@ fun ScanFoodScreen(navController: NavController, scanFoodViewModel: ScanFoodView
             if (bitmap != null) {
                 // Convert bitmap to JPEG format if not already in JPEG
                 if (!selectedUri.toString().endsWith(".jpg")) {
-                    imageUri = saveBitmapAsJpegAndGetUri(context, bitmap)
+                    imageUri = saveBitmapAsJpegAndGetUri(context, bitmap, quality = 50)
                 } else {
                     // If already in JPEG format, no need to convert
                     imageUri = selectedUri
@@ -130,7 +130,7 @@ fun ScanFoodScreen(navController: NavController, scanFoodViewModel: ScanFoodView
                 val capturedBitmap: Bitmap? = loadBitmapFromUri(context, uri)
 
                 if (capturedBitmap != null) {
-                    capturedImageUri = saveBitmapAsJpegAndGetUri(context, capturedBitmap)
+                    capturedImageUri = saveBitmapAsJpegAndGetUri(context, capturedBitmap, quality = 50)
                     imageUri = capturedImageUri  // Update imageUri when photo is captured
                 }
             }
@@ -150,17 +150,6 @@ fun ScanFoodScreen(navController: NavController, scanFoodViewModel: ScanFoodView
     imageUri?.let {
         bitmap.value = loadBitmapFromUri(context, it)
     }
-//    imageUri?.let {
-//        if (Build.VERSION.SDK_INT < 28) {
-//            bitmap.value = MediaStore.Images
-//                .Media.getBitmap(context.contentResolver,it)
-//
-//        } else {
-//            val source = ImageDecoder
-//                .createSource(context.contentResolver,it)
-//            bitmap.value = ImageDecoder.decodeBitmap(source)
-//        }
-//    }
     var isLoading by remember { mutableStateOf(false) }
     val toggleLoading: (Boolean) -> Unit = { loading ->
         isLoading = loading
@@ -181,7 +170,6 @@ fun ScanFoodScreen(navController: NavController, scanFoodViewModel: ScanFoodView
                     contentDescription = null, // Add a proper content description
                     modifier = Modifier
                         .fillMaxWidth()
-//                    .height(180.dp) // Adjust the height as needed
                         .align(Alignment.TopStart)
                 )
                 // Back button
@@ -200,7 +188,6 @@ fun ScanFoodScreen(navController: NavController, scanFoodViewModel: ScanFoodView
                             painter = painterResource(id = R.drawable.arrow_back),
                             contentDescription = stringResource(id = R.string.back)
                         )
-//                    Text(text = stringResource(id = R.string.back))
                     }
                 }
             }
@@ -213,7 +200,7 @@ fun ScanFoodScreen(navController: NavController, scanFoodViewModel: ScanFoodView
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Scan Your Food",
+                    text = stringResource(id = R.string.scan_food),
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold, fontSize = 24.sp),
                     textAlign = TextAlign.Center
                 )
@@ -276,7 +263,7 @@ fun ScanFoodScreen(navController: NavController, scanFoodViewModel: ScanFoodView
                             .weight(1f),
                         colors = ButtonDefaults.buttonColors(containerColor = White)
                     ) {
-                        Text(text = "Gallery",
+                        Text(text = stringResource(id = R.string.gallery),
                             color = Color.Black)
                     }
                     Spacer(modifier = Modifier.width(16.dp))
@@ -295,7 +282,7 @@ fun ScanFoodScreen(navController: NavController, scanFoodViewModel: ScanFoodView
                             .weight(1f),
                         colors = ButtonDefaults.buttonColors(containerColor = White)
                     ) {
-                        Text(text = "Camera",
+                        Text(text = stringResource(id = R.string.camera),
                             color = Color.Black)
                     }
                 }
@@ -320,8 +307,7 @@ fun ScanFoodScreen(navController: NavController, scanFoodViewModel: ScanFoodView
                                     onError = { errorMessage ->
                                         Log.e("ScanFoodScreen", "Scan error: $errorMessage")
                                         toggleLoading(false)
-                                        Toast.makeText(context, "$errorMessage" +
-                                                "Try again or check your connection", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(context, "Scan food error", Toast.LENGTH_SHORT).show()
                                     }
                                 )
                             } else {
@@ -333,14 +319,14 @@ fun ScanFoodScreen(navController: NavController, scanFoodViewModel: ScanFoodView
                             .weight(1f),
                         colors = ButtonDefaults.buttonColors(containerColor = ButtonColor)
                     ) {
-                        Text(text = "Scan")
+                        Text(text = stringResource(id = R.string.scan))
                     }
 
                 }
             }
         }
     }
-    }
+}
 
 private fun loadBitmapFromUri(context: Context, uri: Uri): Bitmap? {
     return if (Build.VERSION.SDK_INT < 28) {
@@ -350,17 +336,18 @@ private fun loadBitmapFromUri(context: Context, uri: Uri): Bitmap? {
         ImageDecoder.decodeBitmap(source)
     }
 }
-private fun saveBitmapAsJpegAndGetUri(context: Context, bitmap: Bitmap): Uri {
+
+private fun saveBitmapAsJpegAndGetUri(context: Context, bitmap: Bitmap, quality: Int = 50): Uri {
     // Create an image file name
-    val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+    val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
     val imageFileName = "JPEG_$timeStamp.jpg"
 
     // Create a new file in the external cache directory
     val imageFile = File(context.externalCacheDir, imageFileName)
 
-    // Save the bitmap to the file
+    // Save the bitmap to the file with compression
     FileOutputStream(imageFile).use { outputStream ->
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+        bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream)
     }
 
     // Return the URI of the newly created file
@@ -370,4 +357,5 @@ private fun saveBitmapAsJpegAndGetUri(context: Context, bitmap: Bitmap): Uri {
         imageFile
     )
 }
+
 

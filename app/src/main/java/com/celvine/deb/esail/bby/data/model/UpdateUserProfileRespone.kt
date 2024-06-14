@@ -1,6 +1,6 @@
 package com.celvine.deb.esail.bby.data.model
 
-data class UpdateUserProfileRespone(
+data class UpdateUserProfileResponse(
     var statusCode: String,
     var message: String
 )

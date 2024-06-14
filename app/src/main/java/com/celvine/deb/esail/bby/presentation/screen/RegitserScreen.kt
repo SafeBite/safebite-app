@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -31,12 +32,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.celvine.deb.esail.bby.R
+import com.celvine.deb.esail.bby.common.LoginState
+import com.celvine.deb.esail.bby.common.RegisterState
 import com.celvine.deb.esail.bby.common.theme.BgColorNew
 import com.celvine.deb.esail.bby.common.theme.BlackText
 import com.celvine.deb.esail.bby.common.theme.ButtonColor
 import com.celvine.deb.esail.bby.data.viewmodels.RegisterViewModel
+import com.celvine.deb.esail.bby.presentation.components.Loading
 import com.celvine.deb.esail.bby.presentation.components.PasswordTextField
 import com.celvine.deb.esail.bby.presentation.components.PrimaryButton
 import com.celvine.deb.esail.bby.route.Routes
@@ -45,14 +51,9 @@ import com.celvine.deb.esail.bby.presentation.components.PrimaryTextField
 @Composable
 fun RegisterScreen(navController: NavController, registerViewModel: RegisterViewModel) {
 
-    var isLoading by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val scrollState = rememberScrollState()
-
-    // State variables for the registration form fields
-    val emailState = remember { mutableStateOf(TextFieldValue()) }
-    val passwordState = remember { mutableStateOf(TextFieldValue()) }
-    val nameState = remember { mutableStateOf(TextFieldValue()) }
+    val uiState by registerViewModel.uiState.observeAsState(RegisterState())
 
     Surface(
         color = BgColorNew,
@@ -89,62 +90,85 @@ fun RegisterScreen(navController: NavController, registerViewModel: RegisterView
             Spacer(modifier = Modifier.height(3.dp))
             PrimaryTextField(
                 placeholder = stringResource(id = R.string.user_name),
-                value = nameState.value,
-                onValueChange = { nameState.value = it }
+                value = uiState.name,
+                onValueChange = { registerViewModel.updateName(it) }
             )
-
+            uiState.nameError?.let { error ->
+                Text(
+                    text = error,
+                    color = Color.Red,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
             Spacer(modifier = Modifier.height(18.dp))
             PrimaryTextField(
                 placeholder = stringResource(id = R.string.email),
-                value = emailState.value,
-                onValueChange = { emailState.value = it }
+                value = uiState.email,
+                onValueChange = { registerViewModel.updateEmail(it) }
             )
+            uiState.emailError?.let { error ->
+                Text(
+                    text = error,
+                    color = Color.Red,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.height(18.dp))
             PasswordTextField(
                 placeholder = stringResource(id = R.string.password),
-                value = passwordState.value,
-                onValueChange = { passwordState.value = it }
+                value = uiState.password,
+                onValueChange = { registerViewModel.updatePassword(it) }
             )
+            uiState.passwordError?.let { error ->
+                Text(
+                    text = error,
+                    color = Color.Red,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.height(15.dp))
             Spacer(modifier = Modifier.height(20.dp))
             PrimaryButton(
                 text = stringResource(id = R.string.register),
                 onClick = {
-                    isLoading = true
-                    val email = emailState.value.text
-                    val password = passwordState.value.text
-                    val name = nameState.value.text
-                    registerViewModel.registerUser(name, email, password,
-                        onSuccess = {
-                            registerViewModel.sendActivationOTP(email,
-                                onSuccess = {
-                                    isLoading = false
-                                    // OTP sent successfully
-                                    // You can show a success message or perform any other action
-                                    Log.d("OTP", "OTP sent success")
-                                    navController.navigate(Routes.Token.routes)
-                                },
-                                onError = { errorMessage ->
-                                    isLoading = false
-                                    Log.d("OTP", "OTP sent error")
-                                    Toast.makeText(context, "$errorMessage" +
-                                            "Try again or check your connection", Toast.LENGTH_SHORT).show()
-                                }
-                            )
-                            // Login successful, navigate to TokenScreen
-                            Log.d("register", "register success")
-//                            navController.navigate(Routes.Token.routes)
-                        },
-                        onError = { errorMessage ->
-                            isLoading = false
-                            Toast.makeText(context, "$errorMessage" +
-                                    "Try again or check your connection", Toast.LENGTH_SHORT).show()
-                            // Handle login error
-                            // Show an error message or perform any other action
-                        }
-                    )
+                    registerViewModel.setLoading(true)
+                    if (registerViewModel.isValidName(uiState.name.text) && registerViewModel.isValidEmail(uiState.email.text) && registerViewModel.isValidPassword(uiState.password.text)) {
+                        val email = uiState.email.text
+                        val password = uiState.password.text
+                        val name = uiState.name.text
+                        registerViewModel.registerUser(name, email, password,
+                            onSuccess = {
+                                Log.d("register", "Register success, calling sendActivationOTP")
+                                registerViewModel.sendActivationOTP(email,
+                                    onSuccess = {
+                                        Log.d("OTP", "OTP sent success")
+                                        navController.navigate(Routes.Token.routes)
+                                        registerViewModel.setLoading(false)
+                                    },
+                                    onError = {
+                                        registerViewModel.setLoading(false)
+                                        Log.d("OTP", "OTP sent error")
+                                        Toast.makeText(context, "Failed send OTP", Toast.LENGTH_SHORT).show()
+                                    }
+                                )
+                                Log.d("register", "register success")
+                            },
+                            onError = {
+                                registerViewModel.setLoading(false)
+                                Toast.makeText(context, context.getString(R.string.invalidRegister), Toast.LENGTH_SHORT).show()
+                            }
+                        )
+                    } else {
+                        Toast.makeText(context, context.getString(R.string.invalidRegisterFormat), Toast.LENGTH_SHORT).show()
+                        registerViewModel.updateName(uiState.name)
+                        registerViewModel.updateEmail(uiState.email)
+                        registerViewModel.updatePassword(uiState.password)
+                    }
                 }
             )
 
@@ -177,7 +201,7 @@ fun RegisterScreen(navController: NavController, registerViewModel: RegisterView
                 }
             }
         }
-        if (isLoading) {
+        if (uiState.isLoading) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -193,3 +217,4 @@ fun RegisterScreen(navController: NavController, registerViewModel: RegisterView
         }
     }
 }
+

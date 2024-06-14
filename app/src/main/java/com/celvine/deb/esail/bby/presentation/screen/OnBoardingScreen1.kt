@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -66,20 +67,19 @@ fun OnBoardingScreen1(navController: NavController, foodViewModel: FoodViewModel
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "Do you have food allergy?",
+                        text = stringResource(id = R.string.have_allergy_title),
                         style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
                         textAlign = TextAlign.Justify
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Food allergy is an immune system reaction that occurs soon after eating a certain food.",
+                        text = stringResource(id = R.string.desc_food_allergy),
                         style = MaterialTheme.typography.bodySmall,
                         textAlign = TextAlign.Justify
                     )
                 }
             }
         }
-        // Bottom Bar
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -98,7 +98,7 @@ fun OnBoardingScreen1(navController: NavController, foodViewModel: FoodViewModel
                         .weight(1f),
                     colors = ButtonDefaults.buttonColors(containerColor = White)
                 ) {
-                    Text(text = "No, I don't have", color = Color.Black)
+                    Text(text = stringResource(id = R.string.dont_have_allergy), color = Color.Black)
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Button(
@@ -111,7 +111,7 @@ fun OnBoardingScreen1(navController: NavController, foodViewModel: FoodViewModel
                         .weight(1f),
                     colors = ButtonDefaults.buttonColors(containerColor = ButtonColor)
                 ) {
-                    Text(text = "Yes, I have")
+                    Text(text = stringResource(id = R.string.have_allergy))
                 }
             }
         }

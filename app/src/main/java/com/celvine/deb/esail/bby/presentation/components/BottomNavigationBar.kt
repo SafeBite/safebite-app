@@ -33,12 +33,6 @@ fun BottomNavigationBar(navController: NavController) {
                 selected = currentRoute == item.route,
                 onClick = {
                     navController.navigate(item.route) {
-                        // Handle navigation based on current destination
-//                        if (currentRoute != null) {
-//                            popUpTo(navController.graph.startDestinationId) {
-//                                inclusive = false // Do not include the start destination
-//                            }
-//                        }
                         launchSingleTop = true
                         restoreState = true
                     }

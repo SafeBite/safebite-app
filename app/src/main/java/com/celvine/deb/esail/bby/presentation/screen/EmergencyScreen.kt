@@ -56,14 +56,13 @@ import com.celvine.deb.esail.bby.data.viewmodels.EmergencyViewModel
 
 @Composable
 fun EmergencyScreen(
-    paddingValues: PaddingValues,
     navController: NavController,
     emergencyViewModel: EmergencyViewModel
-){
+) {
     Surface(
         color = BgColorNew,
         modifier = Modifier.fillMaxSize()
-    ){
+    ) {
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
@@ -73,7 +72,6 @@ fun EmergencyScreen(
                 contentDescription = null, // Add a proper content description
                 modifier = Modifier
                     .fillMaxWidth()
-//                    .height(180.dp) // Adjust the height as needed
                     .align(Alignment.TopStart)
             )
             // Back button
@@ -92,7 +90,6 @@ fun EmergencyScreen(
                         painter = painterResource(id = R.drawable.arrow_back),
                         contentDescription = stringResource(id = R.string.back)
                     )
-//                    Text(text = stringResource(id = R.string.back))
                 }
             }
             // Box containing the white background, emergency text, and hospital list
@@ -100,7 +97,7 @@ fun EmergencyScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 132.dp) // Adjust top padding to match banner height
-                    .background(color = Color.White)
+                    .background(color = BgColorNew)
             ) {
                 Column(
                     modifier = Modifier
@@ -108,16 +105,20 @@ fun EmergencyScreen(
                         .fillMaxWidth()
                 ) {
                     Text(
-                        text = "Emergency",
-                        style = MaterialTheme.typography.titleLarge.copy(fontSize = 24.sp),
+                        text = stringResource(id = R.string.emergency),
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp
+                        ),
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(top = 0.dp)
+                        contentPadding = PaddingValues(top = 0.dp, bottom = 56.dp) // Add bottom padding
                     ) {
                         items(emergencyViewModel.hospitals.value) { item ->
-                            Hospital(item = item, viewModel = EmergencyViewModel())
+                            Hospital(item = item, viewModel = emergencyViewModel)
+                            Spacer(modifier = Modifier.height(10.dp))
                         }
                     }
                 }
@@ -125,6 +126,7 @@ fun EmergencyScreen(
         }
     }
 }
+
 
 @Composable
 fun Hospital(
@@ -197,4 +199,6 @@ fun Hospital(
         }
     }
 }
+
+
 

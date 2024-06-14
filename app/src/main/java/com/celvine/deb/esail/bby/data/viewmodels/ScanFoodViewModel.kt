@@ -18,8 +18,6 @@ class ScanFoodViewModel(context: Context) : ViewModel() {
     private val contentResolver: ContentResolver = context.contentResolver
     var responModel: PredictionResponse? = null
 
-    val isLoading = mutableStateOf(false)
-
     fun scanFood(imageUri: Uri, onSuccess: () -> Unit, onError: (String) -> Unit) {
         val apiService = ApiConfig.instanceRetrofit
         val fileRequestBody = ContentUriRequestBody(contentResolver, imageUri)

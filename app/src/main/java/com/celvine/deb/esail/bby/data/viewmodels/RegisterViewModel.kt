@@ -1,113 +1,133 @@
 package com.celvine.deb.esail.bby.data.viewmodels
 
 import android.util.Log
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.celvine.deb.esail.bby.api.ApiConfig
+import com.celvine.deb.esail.bby.common.RegisterState
 import com.celvine.deb.esail.bby.data.model.AccountVerificationOTP
-import com.celvine.deb.esail.bby.data.model.ResponModel
+import com.celvine.deb.esail.bby.data.model.RegistrationResponse
+import com.celvine.deb.esail.bby.data.model.SendOTP
+import com.celvine.deb.esail.bby.data.model.VerifyOTP
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class RegisterViewModel : ViewModel() {
+class RegisterViewModel() : ViewModel() {
+    private val apiService = ApiConfig.instanceRetrofit
 
-    fun registerUser(name: String, email: String, password: String,onSuccess: () -> Unit, onError: (String) -> Unit  ) {
-        // Make the API call to register the user
-        val apiService = ApiConfig.instanceRetrofit
-        val call = apiService.register(name, email, password)
+    private val _uiState = MutableLiveData(RegisterState())
+    val uiState: LiveData<RegisterState> = _uiState
 
-        // Handle the response asynchronously
-        call.enqueue(object : retrofit2.Callback<ResponModel> {
-            override fun onResponse(call: Call<ResponModel>, response: Response<ResponModel>) {
+    fun updateName(name: TextFieldValue) {
+        _uiState.value = _uiState.value?.copy(
+            name = name,
+            nameError = if (isValidName(name.text)) null else "Invalid name format")
+    }
+
+    fun updateEmail(email: TextFieldValue) {
+        _uiState.value = _uiState.value?.copy(
+            email = email,
+            emailError = if (isValidEmail(email.text)) null else "Invalid email format")
+    }
+
+    fun updatePassword(password: TextFieldValue) {
+        _uiState.value = _uiState.value?.copy(
+            password = password,
+            passwordError = if (isValidPassword(password.text)) null else "Password must be at least 8 character")
+    }
+
+    fun updateCode(code: TextFieldValue) {
+        _uiState.value = _uiState.value?.copy(
+            code = code,
+            codeError = if (isValidCode(code.text)) null else "Invalid code")
+    }
+
+    fun setLoading(isLoading: Boolean) {
+        _uiState.value = _uiState.value?.copy(isLoading = isLoading)
+    }
+
+    fun isValidName(name: String): Boolean {
+        return name.length >= 2
+    }
+
+    fun isValidCode(name: String): Boolean {
+        return name.length >= 2
+    }
+
+    fun isValidEmail(email: String): Boolean {
+        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    }
+
+    fun isValidPassword(password: String): Boolean {
+        return password.length >= 8
+    }
+
+    fun registerUser(name: String, email: String, password: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
+        apiService.register(name, email, password).enqueue(object : Callback<RegistrationResponse> {
+            override fun onResponse(call: Call<RegistrationResponse>, response: Response<RegistrationResponse>) {
                 if (response.isSuccessful) {
-                    // Registration successful
                     val responModel = response.body()
-                    if (responModel?.success == 1) {
-                        // OTP sent successfully
+                    if (responModel != null) {
+//                        sendActivationOTP(email, onSuccess, onError)
                         onSuccess.invoke()
                     } else {
-                        // Failed to send OTP
                         onError.invoke("Failed to send OTP")
                     }
-                    // Handle the response as needed
-                    onSuccess.invoke()
-                    Log.d("RegisterViewModel", "Registration successful")
                 } else {
-                    // Registration failed
-                    // Handle the error response
-                    Log.d("RegisterViewModel", "Registration error")
+                    onError.invoke("Registration error")
                 }
             }
 
-            override fun onFailure(call: Call<ResponModel>, t: Throwable) {
-                // Registration failed due to network error
-                // Handle the failure
+            override fun onFailure(call: Call<RegistrationResponse>, t: Throwable) {
+                onError.invoke("Registration failed: ${t.message}")
             }
         })
     }
-    fun sendActivationOTP(email: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
-        // Call the send activation OTP API endpoint using the ApiService from ApiConfig
-        val apiService = ApiConfig.instanceRetrofit
-        val sendOtpCall: Call<ResponModel> = apiService.sendActivationOTP(email)
 
-        // Make an asynchronous API request
-        sendOtpCall.enqueue(object : Callback<ResponModel> {
-            override fun onResponse(call: Call<ResponModel>, response: Response<ResponModel>) {
-                // Handle the response here
+    fun sendActivationOTP(email: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
+        apiService.sendActivationOTP(email).enqueue(object : Callback<SendOTP> {
+            override fun onResponse(call: Call<SendOTP>, response: Response<SendOTP>) {
                 if (response.isSuccessful) {
-                    val responModel: ResponModel? = response.body()
-                    if (responModel?.success == 1) {
-                        // OTP sent successfully
+                    val responModel = response.body()
+                    if (responModel != null) {
                         onSuccess.invoke()
                     } else {
-                        // Failed to send OTP
                         onError.invoke("Failed to send OTP")
                     }
                 } else {
-                    // Failed to send OTP
                     onError.invoke("Failed to send OTP")
                 }
             }
 
-            override fun onFailure(call: Call<ResponModel>, t: Throwable) {
-                // Handle the failure case
-                onError.invoke("Failed to send OTP")
+            override fun onFailure(call: Call<SendOTP>, t: Throwable) {
+                onError.invoke("Failed to send OTP: ${t.message}")
             }
         })
     }
-    fun verifyActivationOTP(
-        data: AccountVerificationOTP,
-        onSuccess: () -> Unit,
-        onError: (String) -> Unit
-    ) {
-        // Call the verify activation OTP API endpoint using the ApiService from ApiConfig
-        val apiService = ApiConfig.instanceRetrofit
-        val verifyOtpCall: Call<ResponModel> = apiService.verifyActivationOTP(data)
 
-        // Make an asynchronous API request
-        verifyOtpCall.enqueue(object : Callback<ResponModel> {
-            override fun onResponse(call: Call<ResponModel>, response: Response<ResponModel>) {
-                // Handle the response here
+    fun verifyActivationOTP(data: AccountVerificationOTP, onSuccess: () -> Unit, onError: (String) -> Unit) {
+        apiService.verifyActivationOTP(data).enqueue(object : Callback<VerifyOTP> {
+            override fun onResponse(call: Call<VerifyOTP>, response: Response<VerifyOTP>) {
                 if (response.isSuccessful) {
-                    val responModel: ResponModel? = response.body()
-                    if (responModel?.success == 1) {
-                        // OTP verification successful
+                    val responModel = response.body()
+                    if (responModel != null) {
                         onSuccess.invoke()
                     } else {
-                        // OTP verification failed
                         onError.invoke("OTP verification failed")
                     }
-                    onSuccess.invoke()
                 } else {
-                    // OTP verification failed
                     onError.invoke("OTP verification failed")
                 }
             }
 
-            override fun onFailure(call: Call<ResponModel>, t: Throwable) {
-                // Handle the failure case
-                onError.invoke("OTP verification failed")
+            override fun onFailure(call: Call<VerifyOTP>, t: Throwable) {
+                onError.invoke("OTP verification failed: ${t.message}")
             }
         })
     }
 }
+
+

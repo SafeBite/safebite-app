@@ -3,6 +3,7 @@ package com.celvine.deb.esail.bby.presentation.screen
 import android.annotation.SuppressLint
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.ButtonDefaults
@@ -32,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -65,18 +67,20 @@ fun ChangeAllergenScreen(navController: NavController, loginViewModel: LoginView
                 // Show an error message or perform any other action
             })
     }
-    val customIndices = listOf(30, 31, 1, 16, 24, 114, 17, 119, 85, 18)
-    val customTexts = listOf("Milk", "Cheese", "Pork", "Egg", "Shrimp", "Almond", "Beef", "Oyster", "Fish", "Chicken")
+    val customIndices = listOf(30, 2, 1, 16, 24, 114, 17, 119, 85, 18, 120, 61)
+    val customTexts = listOf("Milk", "Soy", "Pork", "Egg", "Shrimp", "Peanut", "Beef", "Oyster", "Fish", "Chicken", "Sesame", "Wheat" )
 
-    val initialSelection = remember { mutableStateListOf<Int>() }
+//    val initialSelection = remember { mutableStateListOf<Int>() }
 
-    LaunchedEffect(userAllergenIds) {
-        initialSelection.clear()
-        initialSelection.addAll(userAllergenIds)
+    LaunchedEffect(Unit) {
         profileViewModel.setInitialSelectedIcons(userAllergenIds)
     }
-
-    val currentSelection = remember { mutableStateListOf<Int>().apply { addAll(profileViewModel.selectedIconIds) } }
+    BackHandler {
+        profileViewModel.clearSelectedIcons()
+        profileViewModel.setInitialSelectedIcons(userAllergenIds)
+        navController.popBackStack()
+    }
+//    val currentSelection = remember { mutableStateListOf<Int>().apply { addAll(profileViewModel.selectedIconIds) } }
 
     Box(
         modifier = Modifier
@@ -90,7 +94,7 @@ fun ChangeAllergenScreen(navController: NavController, loginViewModel: LoginView
                 .padding(16.dp)
         ) {
             Text(
-                text = "What should you avoid?",
+                text = stringResource(id = R.string.choose_allergen_title),
                 style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
                 textAlign = TextAlign.Justify,
                 modifier = Modifier.padding(bottom = 16.dp)
@@ -103,7 +107,7 @@ fun ChangeAllergenScreen(navController: NavController, loginViewModel: LoginView
                     .padding(top = 16.dp, bottom = 16.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text(text = "Select one or more")
+                    Text(text = stringResource(id = R.string.choose_allergen_sub_tittle))
                     Spacer(modifier = Modifier.height(8.dp))
                     LazyVerticalGrid(columns = GridCells.Fixed(4)) {
                         items(customIndices.size) { idx ->
@@ -111,16 +115,18 @@ fun ChangeAllergenScreen(navController: NavController, loginViewModel: LoginView
                             val text = customTexts[idx]
                             val imageResId = when (index) {
                                 30 -> R.drawable.milk_icon
-                                31 -> R.drawable.cheese_icon
+                                2 -> R.drawable.soy_icon
                                 1 -> R.drawable.pork_icon
                                 16 -> R.drawable.egg_icon
                                 24 -> R.drawable.shrimp_icon
-                                114 -> R.drawable.almond_icon
+                                114 -> R.drawable.peanut_icon
                                 17 -> R.drawable.beef_icon
                                 119 -> R.drawable.oyster
                                 85 -> R.drawable.fish_icon
                                 18 -> R.drawable.chicken
-                                else -> R.drawable.chicken
+                                120 -> R.drawable.sesame
+                                61 -> R.drawable.wheat
+                                else -> R.drawable.wheat
                             }
                             val isSelected = remember {
                                 mutableStateOf(
@@ -136,12 +142,15 @@ fun ChangeAllergenScreen(navController: NavController, loginViewModel: LoginView
                                         isSelected.value = !isSelected.value
                                         if (isSelected.value) {
                                             profileViewModel.addIconId(index)
-                                            currentSelection.add(index)
+//                                            currentSelection.add(index)
                                         } else {
                                             profileViewModel.removeIconId(index)
-                                            currentSelection.remove(index)
+//                                            currentSelection.remove(index)
                                         }
-                                        Log.d("Selected Allergens", "Selected allergens: ${profileViewModel.selectedIconIds}")
+                                        Log.d(
+                                            "Selected Allergens",
+                                            "Selected allergens: ${profileViewModel.selectedIconIds}"
+                                        )
                                     }
 
                             ) {
@@ -165,6 +174,8 @@ fun ChangeAllergenScreen(navController: NavController, loginViewModel: LoginView
             ) {
                 Button(
                     onClick = {
+                        profileViewModel.clearSelectedIcons()  // Clear selected icons
+                        profileViewModel.setInitialSelectedIcons(userAllergenIds)  // Reset to initial state
                         navController.popBackStack()
                     },
                     modifier = Modifier
@@ -172,30 +183,50 @@ fun ChangeAllergenScreen(navController: NavController, loginViewModel: LoginView
                         .weight(1f),
                     colors = ButtonDefaults.buttonColors(containerColor = White)
                 ) {
-                    Text(text = "Back", color = Color.Black)
+                    Text(text = stringResource(id = R.string.back), color = Color.Black)
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Button(
                     onClick = {
                         isLoading = true
-                        val allergensList = profileViewModel.selectedIconIds
-                        Log.d("Selected Allergens", "Selected allergens: $allergensList")
-                        val request: UpdateUserRequest = UpdateUserRequest(name = loginViewModel.userResponse.value?.data?.name, allergens = allergensList)
-                        profileViewModel.updateUsers(request,
+                        // First, send an empty list
+                        val emptyRequest = UpdateUserRequest(
+                            name = loginViewModel.userResponse.value?.data?.name,
+                            allergens = emptyList()
+                        )
+                        profileViewModel.updateUsers(
+                            emptyRequest,
                             onSuccess = {
-                                isLoading = false
-                                Log.d("UpdateUser", "UpdateUser success ${loginViewModel.userResponse.value?.data}")
-                                navController.navigate(Routes.Profile.routes){
-                                    popUpTo(Routes.Profile.routes) {
-                                        inclusive = true
+                                // Then, send the updated allergen list
+                                val allergensList = profileViewModel.selectedIconIds
+                                Log.d("Selected Allergens", "Selected allergens: $allergensList")
+                                val request = UpdateUserRequest(
+                                    name = loginViewModel.userResponse.value?.data?.name,
+                                    allergens = allergensList
+                                )
+                                profileViewModel.updateUsers(
+                                    request,
+                                    onSuccess = {
+                                        isLoading = false
+                                        Log.d("UpdateUser", "UpdateUser success ${loginViewModel.userResponse.value?.data}")
+                                        navController.navigate(Routes.Profile.routes) {
+                                            popUpTo(Routes.Profile.routes) {
+                                                inclusive = true
+                                            }
+                                        }
+                                        Toast.makeText(context, context.getString(R.string.success_change_allergen), Toast.LENGTH_SHORT).show()
+                                    },
+                                    onError = { errorMessage ->
+                                        isLoading = false
+                                        Toast.makeText(context, context.getString(R.string.failed_change_allergen), Toast.LENGTH_SHORT).show()
                                     }
-                                }
+                                )
                             },
                             onError = { errorMessage ->
                                 isLoading = false
-                                Toast.makeText(context, "$errorMessage" +
-                                        "Try again or check your connection", Toast.LENGTH_SHORT).show()
-                            })
+                                Toast.makeText(context, context.getString(R.string.failed_change_allergen), Toast.LENGTH_SHORT).show()
+                            }
+                        )
                     },
 //                    enabled = hasChanges.value,
                     modifier = Modifier
@@ -205,7 +236,7 @@ fun ChangeAllergenScreen(navController: NavController, loginViewModel: LoginView
                         containerColor = ButtonColor
                     )
                 ) {
-                    Text(text = "Save", color =  Color.White)
+                    Text(text = stringResource(id = R.string.save), color =  Color.White)
                 }
             }
         }

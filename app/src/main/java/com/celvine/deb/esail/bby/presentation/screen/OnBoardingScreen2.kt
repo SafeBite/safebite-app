@@ -22,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -30,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -43,24 +45,21 @@ import com.celvine.deb.esail.bby.presentation.components.GridItem
 import com.celvine.deb.esail.bby.route.Routes
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun OnBoardingScreen2(navController: NavController, loginViewModel: LoginViewModel, profileViewModel: ProfileViewModel) {
     LaunchedEffect(Unit) {
         loginViewModel.getUser(
             onSuccess = {
-                // Login successful, navigate to TokenScreen
                 Log.d("getUser", "getUser success")
             },
-            onError = { errorMessage ->
-                // Handle login error
-                // Show an error message or perform any other action
+            onError = {
             })
     }
     val context = LocalContext.current
-    val customIndices = listOf(30, 31, 1, 16, 24, 114, 17, 119, 85, 18)
-    val customTexts = listOf("Milk", "Cheese", "Pork", "Egg", "Shrimp", "Almond", "Beef", "Oyster", "Fish", "Chicken")
+    val customIndices = listOf(30, 2, 1, 16, 24, 114, 17, 119, 85, 18, 120, 61)
+    val customTexts = listOf("Milk", "Soy", "Pork", "Egg", "Shrimp", "Peanut", "Beef", "Oyster", "Fish", "Chicken", "Sesame", "Wheat")
     var isLoading by remember { mutableStateOf(false) }  // Loading state
+    val selectedIconIds = remember { mutableStateListOf<Int>() }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -72,7 +71,7 @@ fun OnBoardingScreen2(navController: NavController, loginViewModel: LoginViewMod
                 .padding(16.dp)
         ) {
             Text(
-                text = "What should you avoid?",
+                text = stringResource(id = R.string.choose_allergen_title),
                 style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
                 textAlign = TextAlign.Justify,
                 modifier = Modifier.padding(bottom = 16.dp)
@@ -85,7 +84,7 @@ fun OnBoardingScreen2(navController: NavController, loginViewModel: LoginViewMod
                     .padding(top = 16.dp, bottom = 16.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text(text = "Select one or more")
+                    Text(text = stringResource(id = R.string.choose_allergen_sub_tittle))
                     Spacer(modifier = Modifier.height(8.dp))
                     LazyVerticalGrid(columns = GridCells.Fixed(4)) {
                         items(customIndices.size) { idx ->
@@ -93,16 +92,18 @@ fun OnBoardingScreen2(navController: NavController, loginViewModel: LoginViewMod
                             val text = customTexts[idx]
                             val imageResId = when (index) {
                                 30 -> R.drawable.milk_icon
-                                31 -> R.drawable.cheese_icon
+                                2 -> R.drawable.soy_icon
                                 1 -> R.drawable.pork_icon
                                 16 -> R.drawable.egg_icon
                                 24 -> R.drawable.shrimp_icon
-                                114 -> R.drawable.almond_icon
+                                114 -> R.drawable.peanut_icon
                                 17 -> R.drawable.beef_icon
                                 119 -> R.drawable.oyster
                                 85 -> R.drawable.fish_icon
                                 18 -> R.drawable.chicken
-                                else -> R.drawable.chicken
+                                120 -> R.drawable.sesame
+                                61 -> R.drawable.wheat
+                                else -> R.drawable.wheat
                             }
                             val isSelected = remember { mutableStateOf(index in profileViewModel.selectedIconIds) }
                             Box(
@@ -111,11 +112,16 @@ fun OnBoardingScreen2(navController: NavController, loginViewModel: LoginViewMod
                                     .clickable {
                                         isSelected.value = !isSelected.value
                                         if (isSelected.value) {
+                                            selectedIconIds.add(index)
                                             profileViewModel.addIconId(index)
                                         } else {
+                                            selectedIconIds.remove(index)
                                             profileViewModel.removeIconId(index)
                                         }
-                                        Log.d("Selected Allergens", "Selected allergens: ${profileViewModel.selectedIconIds}")
+                                        Log.d(
+                                            "Selected Allergens",
+                                            "Selected allergens: ${profileViewModel.selectedIconIds}"
+                                        )
                                     }
 
                             ) {
@@ -150,37 +156,45 @@ fun OnBoardingScreen2(navController: NavController, loginViewModel: LoginViewMod
                         .weight(1f),
                     colors = ButtonDefaults.buttonColors(containerColor = White)
                 ) {
-                    Text(text = "Back", color = Color.Black)
+                    Text(text = stringResource(id = R.string.back), color = Color.Black)
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Button(
                     onClick = {
-                        isLoading = true
-                        val allergensList = profileViewModel.selectedIconIds
-                        Log.d("Selected Allergens", "Selected allergens: $allergensList")
-                        val request: UpdateUserRequest = UpdateUserRequest(name = loginViewModel.userResponse.value?.data?.name, allergens = allergensList)
-                        profileViewModel.updateUsers(request,
-                            onSuccess = {
-                                isLoading = false
-                                Log.d("UpdateUser", "UpdateUser success ${loginViewModel.userResponse.value?.data}")
-                                navController.navigate(Routes.Home.routes){
-                                    popUpTo(Routes.Home.routes) {
-                                        inclusive = true
+                        if (selectedIconIds.isNotEmpty()) {
+                            isLoading = true
+                            val allergensList = profileViewModel.selectedIconIds
+                            val request: UpdateUserRequest = UpdateUserRequest(name = loginViewModel.userResponse.value?.data?.name, allergens = allergensList)
+                            profileViewModel.updateUsers(request,
+                                onSuccess = {
+                                    isLoading = false
+                                    navController.navigate(Routes.Home.routes){
+                                        popUpTo(Routes.Home.routes) {
+                                            inclusive = true
+                                        }
                                     }
-                                }
-                            },
-                            onError = { errorMessage ->
-                                isLoading = false
-                                Toast.makeText(context, "$errorMessage" +
-                                        "Try again or check your connection", Toast.LENGTH_SHORT).show()
-                            })
+                                },
+                                onError = { errorMessage ->
+                                    isLoading = false
+                                    Toast.makeText(context,
+                                        context.getString(R.string.failed_change_allergen), Toast.LENGTH_SHORT).show()
+                                })
+                        } else {
+                            Toast.makeText(context, context.getString(R.string.please_select_allergen), Toast.LENGTH_SHORT).show()
+                        }
                     },
                     modifier = Modifier
                         .shadow(5.dp, shape = CircleShape)
                         .weight(1f),
-                    colors = ButtonDefaults.buttonColors(containerColor = ButtonColor)
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            containerColor = if (selectedIconIds.isNotEmpty()) ButtonColor else Color.Gray
+                    ),
+                    enabled = selectedIconIds.isNotEmpty()
                 ) {
-                    Text(text = "Continue")
+                    Text(
+                        text = stringResource(id = R.string.continue_button),
+                        color = if (selectedIconIds.isNotEmpty()) Color.White else Color.Black)
                 }
             }
         }

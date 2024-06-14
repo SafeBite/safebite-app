@@ -62,8 +62,8 @@ fun HomeScreen(
         loginViewModel.getUser(
             onSuccess = {
                 if (loginViewModel.userResponse.value?.data?.name != null) {
-                    loading = false
                     foodViewModel.getAllFoods()
+                    loading = false
                 }
                 Log.d("getUser", "getUser success")
             },
@@ -75,9 +75,10 @@ fun HomeScreen(
     if (userResponse?.data?.name != null) {
         loading = false
     }
-    if (!loading) {
-        val uiState by foodViewModel.uiState.collectAsState()
 
+    val uiState by foodViewModel.uiState.collectAsState()
+
+    if (!loading) {
         when (uiState) {
             is UiState.Success -> {
                 val userAllergens = userResponse?.data?.alergens?.map { it.name } ?: emptyList()
@@ -88,98 +89,100 @@ fun HomeScreen(
             }
             is UiState.Error -> {
                 Text(text = stringResource(id = R.string.error))
+                loadingFood = false
+            }
+            is UiState.Loading -> {
+                loadingFood = true
             }
         }
     }
 
-        Surface(
-            color = BgColorNew,
-            modifier = Modifier.fillMaxSize()
+    Surface(
+        color = BgColorNew,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = BgColorNew)
         ) {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(color = BgColorNew)
-            ) {
-                item {
-                    Column(
-                        modifier = Modifier
-                            .padding(16.dp)
+            item {
+                Column(
+                    modifier = Modifier
+                        .padding(16.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            if (loading){
-                                ShimmerNameHome()
-                            } else {
-                                Text(
-                                    text = "Welcome back, ${loginViewModel.userResponse?.value?.data?.name ?: "Guest"}",
-                                    style = MaterialTheme.typography.bodyLarge.copy(
-                                        fontWeight = FontWeight.SemiBold,
-                                        fontSize = 12.sp
-                                    )
+                        if (loading){
+                            ShimmerNameHome()
+                        } else {
+                            Text(
+                                text = "Welcome back, ${loginViewModel.userResponse?.value?.data?.name ?: "Guest"}",
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 12.sp
                                 )
-                            }
-                            FilledIconButton(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(8.dp)),
-                                onClick = {
-                                    navController.navigate(Routes.Profile.routes){
-//                                        popUpTo(Routes.Profile.routes) {
-//                                            inclusive = true
-//                                        }
-                                    }
-                                },
-                                colors = IconButtonDefaults.filledIconButtonColors(containerColor = White)
-                            ) {
-                                Icon(
-                                    modifier = Modifier
-                                        .size(20.dp),
-                                    painter = painterResource(id = R.drawable.profile),
-                                    contentDescription = "Profile"
-                                )
-                            }
+                            )
                         }
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Box(
+                        FilledIconButton(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .shadow(7.dp, shape = RoundedCornerShape(15))
-                                .background(color = Color.White)
+                                .clip(RoundedCornerShape(8.dp)),
+                            onClick = {
+                                navController.navigate(Routes.Profile.routes)
+
+                            },
+                            colors = IconButtonDefaults.filledIconButtonColors(containerColor = White)
                         ) {
-                            Image(
-                                painter = painterResource(R.drawable.logo_safebite),
-                                contentDescription = "Profile Image",
+                            Icon(
                                 modifier = Modifier
-                                    .clip(RoundedCornerShape(32.dp)),
-                                contentScale = ContentScale.Fit
+                                    .size(20.dp),
+                                painter = painterResource(id = R.drawable.profile),
+                                contentDescription = "Profile"
                             )
                         }
-                        Spacer(modifier = Modifier.height(15.dp))
-                        SearchField(
-                            placeholder = stringResource(id = R.string.search),
-                            enable = false,
-                            onClick = {
-                                navController.navigate(Routes.Search.routes)
-                            },
-                            value = ""
-                        )
-                        Spacer(modifier = Modifier.height(15.dp))
-                        Text(
-                            text = stringResource(id = R.string.food_to_avoid),
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 20.sp
-                            )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .shadow(7.dp, shape = RoundedCornerShape(15))
+                            .background(color = Color.White)
+                    ) {
+                        Image(
+                            painter = painterResource(R.drawable.logo_safebite),
+                            contentDescription = "Profile Image",
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(32.dp)),
+                            contentScale = ContentScale.Fit
                         )
                     }
+                    Spacer(modifier = Modifier.height(15.dp))
+                    SearchField(
+                        placeholder = stringResource(id = R.string.search),
+                        enable = false,
+                        onClick = {
+                            navController.navigate(Routes.Search.routes)
+                        },
+                        value = ""
+                    )
+                    Spacer(modifier = Modifier.height(15.dp))
+                    Text(
+                        text = stringResource(id = R.string.food_to_avoid),
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp
+                        )
+                    )
                 }
-                item {
-                    if (loadingFood) {
-                        ShimmerFoodToAvoid()
-                    } else if (foodsToAvoid.isNotEmpty()){
+            }
+            item {
+                if (loadingFood) {
+                    ShimmerFoodToAvoid()
+                } else {
+                    if (foodsToAvoid.isNotEmpty()) {
                         FoodToAvoid(
                             modifier = Modifier.padding(
                                 start = 16.dp,
@@ -191,7 +194,7 @@ fun HomeScreen(
                         )
                     } else {
                         Text(
-                            text = "There are no foods you should avoid",
+                            text = stringResource(id = R.string.empty_food_avoid),
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.padding(16.dp)
                         )
@@ -199,6 +202,7 @@ fun HomeScreen(
                 }
             }
         }
+    }
 }
 
 @Composable
@@ -218,13 +222,13 @@ fun ShimmerFoodToAvoid() {
         }
     }
 }
+
 @Composable
 fun ShimmerNameHome() {
-    Column(
-    ) {
-            ShimmerName(
-                isLoading = true,
-                contentAfterLoading = {}
-            )
+    Column {
+        ShimmerName(
+            isLoading = true,
+            contentAfterLoading = {}
+        )
     }
 }

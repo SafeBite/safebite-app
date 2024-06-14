@@ -13,7 +13,7 @@ class FoodRepo {
     var foods: List<Food> = emptyList()
     fun getFoods(onSuccess: () -> Unit, onError: (String) -> Unit) {
         val apiService = ApiConfig.instanceRetrofit
-        val getFoodsCall: Call<FoodResponse> = apiService.getFoods(page = 1, limit = 20)
+        val getFoodsCall: Call<FoodResponse> = apiService.getFoods(page = 1, limit = 98)
 
         getFoodsCall.enqueue(object : Callback<FoodResponse> {
             override fun onResponse(call: Call<FoodResponse>, response: Response<FoodResponse>) {

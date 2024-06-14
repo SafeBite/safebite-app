@@ -19,6 +19,7 @@ import androidx.navigation.navArgument
 import com.celvine.deb.esail.bby.api.ApiConfig
 import com.celvine.deb.esail.bby.data.repositories.FoodDetailRepo
 import com.celvine.deb.esail.bby.data.repositories.FoodRepo
+import com.celvine.deb.esail.bby.data.repositories.HospitalRepository
 import com.celvine.deb.esail.bby.data.viewmodels.*
 import com.celvine.deb.esail.bby.presentation.components.BottomNavigationBar
 import com.celvine.deb.esail.bby.presentation.components.Loading
@@ -37,12 +38,12 @@ fun MainNavHost(
     val foodViewModel = remember { FoodViewModel(repository = FoodRepo()) }
     val scanFoodViewModel = remember { ScanFoodViewModel(context) }
     val profileViewModel = remember { ProfileViewModel(context) }
-    val emergencyViewModel = remember { EmergencyViewModel() }
+    val emergencyViewModel = remember { EmergencyViewModel(hospitalRepository = HospitalRepository()) }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
     Scaffold(bottomBar = {
-        if (currentRoute != null && !currentRoute.startsWith(Routes.Detail.routes) && !currentRoute.startsWith(Routes.DetailFoodScreen.routes) && currentRoute != Routes.Detail.routes && currentRoute != Routes.Search.routes && currentRoute != Routes.Profile.routes && currentRoute != Routes.OnBoarding2.routes && currentRoute != Routes.OnBoarding1.routes && currentRoute != Routes.Login.routes && currentRoute != Routes.Register.routes && currentRoute != Routes.Token.routes && currentRoute != Routes.ScanFood.routes && currentRoute != Routes.ChangeAllergenScreen.routes && currentRoute != Routes.DetailFoodScreen.routes && currentRoute != Routes.PredictionScreen.routes&& currentRoute != Routes.Loading.routes) {
+        if (currentRoute != null && !currentRoute.startsWith(Routes.Detail.routes) && !currentRoute.startsWith(Routes.DetailFoodScreen.routes) && currentRoute != Routes.Detail.routes && currentRoute != Routes.Search.routes && currentRoute != Routes.Profile.routes && currentRoute != Routes.OnBoarding2.routes && currentRoute != Routes.OnBoarding1.routes && currentRoute != Routes.Login.routes && currentRoute != Routes.Register.routes && currentRoute != Routes.Token.routes && currentRoute != Routes.ScanFood.routes && currentRoute != Routes.ChangeAllergenScreen.routes && currentRoute != Routes.DetailFoodScreen.routes && currentRoute != Routes.PredictionScreen.routes&& currentRoute != Routes.Loading.routes && currentRoute != Routes.EditProfile.routes) {
             BottomNavigationBar(navController)
         }
     }) { paddingValues ->
@@ -66,10 +67,13 @@ fun MainNavHost(
                 PredictionScreen(navController = navController, scanFoodViewModel = scanFoodViewModel, loginViewModel = loginViewModel)
             }
             composable(Routes.EmergencyScreen.routes) {
-                EmergencyScreen(navController = navController, paddingValues = paddingValues, emergencyViewModel = emergencyViewModel)
+                EmergencyScreen(navController = navController, emergencyViewModel = emergencyViewModel)
             }
             composable(Routes.Profile.routes) {
-                ProfileScreen(navController = navController, loginViewModel = loginViewModel)
+                ProfileScreen(navController = navController, loginViewModel = loginViewModel, profileViewModel = profileViewModel)
+            }
+            composable(Routes.EditProfile.routes) {
+                EditProfileScreen(navController = navController, loginViewModel = loginViewModel, profileViewModel = profileViewModel)
             }
             composable(Routes.Home.routes) {
                 HomeScreen(navController = navController, paddingValues = paddingValues, loginViewModel = loginViewModel)

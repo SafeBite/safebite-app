@@ -29,10 +29,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -49,6 +53,7 @@ import com.celvine.deb.esail.bby.data.viewmodels.LoginViewModel
 import com.celvine.deb.esail.bby.data.viewmodels.ScanFoodViewModel
 import com.celvine.deb.esail.bby.presentation.components.ExpandedText
 import com.celvine.deb.esail.bby.presentation.components.InfoProbability
+import com.celvine.deb.esail.bby.presentation.components.IngredientGrid
 
 
 @Composable
@@ -148,7 +153,7 @@ fun AllowFoodPrediction(
             ElevatedCard(
                 elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
                 modifier = Modifier
-                    .size(width = 360.dp, height = 480.dp)
+                    .size(width = 360.dp, height = 500.dp)
                     .background(color = BgColorNew, shape = RoundedCornerShape(12.dp)),
                 colors = CardDefaults.cardColors(containerColor = BgColorNew, contentColor = Dark)
             ) {
@@ -182,7 +187,7 @@ fun AllowFoodPrediction(
                                 )
                             )
                             Text(
-                                text = "contains:",
+                                text = stringResource(id = R.string.contains),
                                 style = MaterialTheme.typography.labelMedium.copy(
                                     color = desColor,
                                     fontSize = 12.sp,
@@ -190,35 +195,40 @@ fun AllowFoodPrediction(
                                 )
                             )
                             Spacer(modifier = Modifier.height(6.dp))
-                            Row {
-                                ingredients.forEach { ingredient ->
-                                    Box(
-                                        modifier = Modifier
-                                            .background(
-                                                color = GreenNew,
-                                                shape = RoundedCornerShape(8.dp)
-                                            )
-                                            .padding(horizontal = 4.dp, vertical = 2.dp)
-                                            .padding(bottom = 4.dp) // Add spacing between boxes
-                                    ) {
-                                        Text(
-                                            text = ingredient,
-                                            style = MaterialTheme.typography.labelMedium.copy(
-                                                color = White,
-                                                fontSize = 12.sp,
-                                                fontWeight = FontWeight.SemiBold
-                                            )
-                                        )
-                                    }
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                }
-                            }
+                            IngredientGrid(
+                                ingredients = ingredients,
+                                horizontalSpacing = 6.dp,
+                                verticalSpacing = 4.dp
+                            )
+//                            Row {
+//                                ingredients.forEach { ingredient ->
+//                                    Box(
+//                                        modifier = Modifier
+//                                            .background(
+//                                                color = GreenNew,
+//                                                shape = RoundedCornerShape(8.dp)
+//                                            )
+//                                            .padding(horizontal = 4.dp, vertical = 2.dp)
+//                                            .padding(bottom = 4.dp) // Add spacing between boxes
+//                                    ) {
+//                                        Text(
+//                                            text = ingredient,
+//                                            style = MaterialTheme.typography.labelMedium.copy(
+//                                                color = White,
+//                                                fontSize = 12.sp,
+//                                                fontWeight = FontWeight.SemiBold
+//                                            )
+//                                        )
+//                                    }
+//                                    Spacer(modifier = Modifier.width(6.dp))
+//                                }
+//                            }
                         }
                     }
 
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        text = "You Can Eat This Food!",
+                        text = stringResource(id = R.string.can_eat_food),
                         style = MaterialTheme.typography.labelMedium.copy(
                             color = Green,
                             fontWeight = FontWeight.SemiBold,
@@ -227,7 +237,7 @@ fun AllowFoodPrediction(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Description",
+                        text = stringResource(id = R.string.description),
                         style = MaterialTheme.typography.labelMedium.copy(
                             color = Dark,
                             fontWeight = FontWeight.Bold,
@@ -238,7 +248,7 @@ fun AllowFoodPrediction(
                     ExpandedText(text = description)
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Composition",
+                        text = stringResource(id = R.string.composition),
                         style = MaterialTheme.typography.labelMedium.copy(
                             color = Dark,
                             fontWeight = FontWeight.Bold,
@@ -274,7 +284,8 @@ fun AllowFoodPrediction(
                 .clip(RoundedCornerShape(16.dp))
                 .padding(
                     top = 8.dp,
-                    end = 8.dp)
+                    end = 8.dp
+                )
                 .align(Alignment.TopEnd),
             contentAlignment = Alignment.TopEnd
         ) {
@@ -334,7 +345,7 @@ fun NotAllowFoodPrediction(
             ElevatedCard(
                 elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
                 modifier = Modifier
-                    .size(width = 360.dp, height = 480.dp)
+                    .size(width = 360.dp, height = 500.dp)
                     .background(color = BgColorNew, shape = RoundedCornerShape(12.dp)),
                 colors = CardDefaults.cardColors(containerColor = BgColorNew, contentColor = Dark)
             ) {
@@ -368,7 +379,7 @@ fun NotAllowFoodPrediction(
                                 )
                             )
                             Text(
-                                text = "contains:",
+                                text = stringResource(id = R.string.contains),
                                 style = MaterialTheme.typography.labelMedium.copy(
                                     color = desColor,
                                     fontSize = 12.sp,
@@ -376,38 +387,42 @@ fun NotAllowFoodPrediction(
                                 )
                             )
                             Spacer(modifier = Modifier.height(6.dp))
-                            Row(
-//                                modifier = Modifier
-//                                    .padding(horizontal = 4.dp)
-                            ) {
-                                ingredients.forEach { ingredient ->
-                                    Box(
-                                        modifier = Modifier
-                                            .background(
-                                                color = Color.Red,
-                                                shape = RoundedCornerShape(8.dp)
-                                            )
-                                            .padding(horizontal = 4.dp, vertical = 2.dp)
-                                            .padding(bottom = 4.dp) // Add spacing between boxes
-                                    ) {
-                                        Text(
-                                            text = ingredient,
-                                            style = MaterialTheme.typography.labelMedium.copy(
-                                                color = White,
-                                                fontSize = 12.sp,
-                                                fontWeight = FontWeight.SemiBold
-                                            )
-                                        )
-                                    }
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                }
-                            }
+                            IngredientGrid(
+                                ingredients = ingredients,
+                                horizontalSpacing = 6.dp,
+                                verticalSpacing = 4.dp
+                            )
+//                            Row(
+//
+//                            ) {
+//                                ingredients.forEach { ingredient ->
+//                                    Box(
+//                                        modifier = Modifier
+//                                            .background(
+//                                                color = Color.Red,
+//                                                shape = RoundedCornerShape(8.dp)
+//                                            )
+//                                            .padding(horizontal = 4.dp, vertical = 2.dp)
+//                                            .padding(bottom = 4.dp) // Add spacing between boxes
+//                                    ) {
+//                                        Text(
+//                                            text = ingredient,
+//                                            style = MaterialTheme.typography.labelMedium.copy(
+//                                                color = White,
+//                                                fontSize = 12.sp,
+//                                                fontWeight = FontWeight.SemiBold
+//                                            )
+//                                        )
+//                                    }
+//                                    Spacer(modifier = Modifier.width(6.dp))
+//                                }
+//                            }
                         }
                     }
 
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        text = "You Can't Eat This Food!",
+                        text = stringResource(id = R.string.cant_eat_food),
                         style = MaterialTheme.typography.labelMedium.copy(
                             color = Color.Red,
                             fontWeight = FontWeight.SemiBold,
@@ -416,7 +431,7 @@ fun NotAllowFoodPrediction(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Description",
+                        text = stringResource(id = R.string.description),
                         style = MaterialTheme.typography.labelMedium.copy(
                             color = Dark,
                             fontWeight = FontWeight.Bold,
@@ -427,7 +442,7 @@ fun NotAllowFoodPrediction(
                     ExpandedText(text = description)
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Composition",
+                        text = stringResource(id = R.string.composition),
                         style = MaterialTheme.typography.labelMedium.copy(
                             color = Dark,
                             fontWeight = FontWeight.Bold,
@@ -464,7 +479,8 @@ fun NotAllowFoodPrediction(
                 .fillMaxWidth()
                 .padding(
                     top = 8.dp,
-                    end = 8.dp)
+                    end = 8.dp
+                )
                 .align(Alignment.TopEnd),
             contentAlignment = Alignment.TopEnd
         ) {

@@ -4,14 +4,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -21,9 +14,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,38 +25,33 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.celvine.deb.esail.bby.R
+import com.celvine.deb.esail.bby.common.RegisterState
 import com.celvine.deb.esail.bby.common.theme.BgColorNew
 import com.celvine.deb.esail.bby.common.theme.BlackText
 import com.celvine.deb.esail.bby.data.model.AccountVerificationOTP
 import com.celvine.deb.esail.bby.data.viewmodels.RegisterViewModel
 import com.celvine.deb.esail.bby.presentation.components.PrimaryButton
-import com.celvine.deb.esail.bby.route.Routes
 import com.celvine.deb.esail.bby.presentation.components.PrimaryTextField
+import com.celvine.deb.esail.bby.route.Routes
 
 @Composable
 fun TokenScreen(navController: NavController, registerViewModel: RegisterViewModel) {
 
-    var isLoading by remember { mutableStateOf(false) }  // Loading state
     val context = LocalContext.current
+    val uiState by registerViewModel.uiState.observeAsState(RegisterState())
     val scrollState = rememberScrollState()
-    val authType = remember {
-        mutableStateOf("email")
-    }
-    val codeState = remember { mutableStateOf(TextFieldValue()) }
-    val emailState = remember { mutableStateOf(TextFieldValue()) }
 
     Surface(
         color = BgColorNew,
         modifier = Modifier.fillMaxSize()
-    ){
+    ) {
         Column(
             modifier = Modifier
-//                .background(color = BgColorNew)
                 .verticalScroll(scrollState)
                 .padding(16.dp)
         ) {
@@ -87,67 +73,95 @@ fun TokenScreen(navController: NavController, registerViewModel: RegisterViewMod
             Spacer(modifier = Modifier.height(20.dp))
             Text(
                 text = stringResource(id = R.string.otpTitle),
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold,fontSize = 30.sp),
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold, fontSize = 30.sp),
                 color = BlackText,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
             Spacer(modifier = Modifier.height(3.dp))
             PrimaryTextField(
                 placeholder = stringResource(id = R.string.email),
-                value = emailState.value,
-                onValueChange = { emailState.value = it }
+                value = uiState.email,
+                onValueChange = {
+                    registerViewModel.updateEmail(it)
+                }
             )
+            uiState.emailError?.let { error ->
+                Text(
+                    text = error,
+                    color = Color.Red,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
             Spacer(modifier = Modifier.height(20.dp))
             PrimaryTextField(
                 placeholder = stringResource(id = R.string.otp),
-                value = codeState.value,
-                onValueChange = { codeState.value = it }
+                value = uiState.code,
+                onValueChange = {
+                    registerViewModel.updateCode(it)
+                }
             )
-
+            uiState.codeError?.let { error ->
+                Text(
+                    text = error,
+                    color = Color.Red,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
             Spacer(modifier = Modifier.height(30.dp))
             PrimaryButton(text = stringResource(id = R.string.sendOTP), onClick = {
-                val email = emailState.value.text
-                registerViewModel.sendActivationOTP(email,
-                    onSuccess = {
-                        // OTP sent successfully
-                        // You can show a success message or perform any other action
-                        Log.d("OTP", "OTP sent success")
-                        Toast.makeText(context, "Sent OTP code to your email", Toast.LENGTH_SHORT).show()
-                    },
-                    onError = { errorMessage ->
-                        Toast.makeText(context, "Cant sent OTP code, please check your email", Toast.LENGTH_SHORT).show()
-                        // Handle OTP sending error
-                        // Show an error message or perform any other action
-                    }
-                )
+                registerViewModel.setLoading(true)
+                if (registerViewModel.isValidEmail(uiState.email.text)) {
+                    registerViewModel.sendActivationOTP(uiState.email.text,
+                        onSuccess = {
+                            Log.d("OTP", "OTP sent success")
+                            Toast.makeText(context, "Successfully sent OTP code", Toast.LENGTH_SHORT).show()
+                            registerViewModel.setLoading(false)
+                        },
+                        onError = {
+                            registerViewModel.setLoading(false)
+                            Toast.makeText(context, context.getString(R.string.errorSentOTP), Toast.LENGTH_SHORT).show()
+                        }
+                    )
+                } else {
+                    registerViewModel.setLoading(false)
+                    Toast.makeText(context, context.getString(R.string.invalidEmail), Toast.LENGTH_SHORT).show()
+                    registerViewModel.updateEmail(uiState.email)
+                }
             })
             Spacer(modifier = Modifier.height(15.dp))
             PrimaryButton(text = stringResource(id = R.string.verifyOTP), onClick = {
-                isLoading = true
-                val email = emailState.value.text
-                val code = codeState.value.text.toInt()
-                val data: AccountVerificationOTP = AccountVerificationOTP(email, code)
+                registerViewModel.setLoading(true)
+                if (registerViewModel.isValidEmail(uiState.email.text) && registerViewModel.isValidCode(uiState.code.text)) {
+                    val email = uiState.email.text
+                    val code = uiState.code.text.toInt()
+                    val data = AccountVerificationOTP(email, code)
 
-                registerViewModel.verifyActivationOTP(data,
-                    onSuccess = {
-                        isLoading = false
-                        Log.d("OTP", "OTP success")
-                        navController.navigate(Routes.Login.routes){
-                            popUpTo(Routes.Token.routes) {
-                                inclusive = true
+                    registerViewModel.verifyActivationOTP(data,
+                        onSuccess = {
+//                                registerViewModel.setLoading(false)
+                            Log.d("OTP", "OTP success")
+                            navController.navigate(Routes.Login.routes) {
+                                popUpTo(Routes.Token.routes) {
+                                    inclusive = true
+                                }
                             }
-                        }
-                    },
-                    onError = { errorMessage ->
-                        isLoading = false
-                        Toast.makeText(context, "$errorMessage" +
-                                "Your OTP code is not valid, please try again", Toast.LENGTH_SHORT).show()
-                    })
+                            registerViewModel.setLoading(false)
+                        },
+                        onError = {
+                            registerViewModel.setLoading(false)
+                            Toast.makeText(context, context.getString(R.string.errorOTP), Toast.LENGTH_SHORT).show()
+                        })
+                } else {
+                    Toast.makeText(context, context.getString(R.string.invalidOTP), Toast.LENGTH_SHORT).show()
+                    registerViewModel.updateEmail(uiState.email)
+                    registerViewModel.updateEmail(uiState.code)
+                }
             })
-
             Spacer(modifier = Modifier.height(20.dp))
         }
-        if (isLoading) {
+        if (uiState.isLoading) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -162,5 +176,5 @@ fun TokenScreen(navController: NavController, registerViewModel: RegisterViewMod
             }
         }
     }
-
 }
+

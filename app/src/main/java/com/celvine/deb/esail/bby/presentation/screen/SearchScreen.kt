@@ -33,7 +33,6 @@ fun SearchScreen(
     navController: NavHostController = rememberNavController(),
     viewModel: FoodViewModel = viewModel(factory = ViewModelFoodFactory(Injection.provideFoodRepository()))
 ) {
-    val searchText by viewModel.query.collectAsState()
     val listState = rememberLazyListState()
 
     var loading by remember { mutableStateOf(true) }
@@ -94,7 +93,7 @@ fun SearchScreen(
                 } else if (foods.isEmpty()){
                     // Display message when no foods found
                     Text(
-                        text = "No foods found",
+                        text = stringResource(id = R.string.empty_food_list),
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -103,7 +102,7 @@ fun SearchScreen(
                     )
                 } else {
                     Text(
-                        text = "Error",
+                        text = stringResource(id = R.string.error),
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -157,7 +156,7 @@ fun SearchForm(viewModel: FoodViewModel, navController: NavController) {
         }
         Column(modifier = Modifier.weight(1f)) {
             SearchField(
-                placeholder = "Search Food",
+                placeholder = stringResource(id = R.string.search_food),
                 value = query,
                 onValueChange = viewModel::search,
                 onClear = viewModel::removeQuery

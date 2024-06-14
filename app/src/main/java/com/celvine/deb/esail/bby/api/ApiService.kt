@@ -13,7 +13,7 @@ interface ApiService {
         @Field("name") name: String,
         @Field("email") email: String,
         @Field("password") password: String
-    ): Call<ResponModel>
+    ): Call<RegistrationResponse>
 
     @FormUrlEncoded
     @POST("users/login")
@@ -26,12 +26,12 @@ interface ApiService {
     @POST("users/activate/send")
     fun sendActivationOTP(
         @Field("email") email: String
-    ): Call<ResponModel>
+    ): Call<SendOTP>
 
     @POST("users/activate")
     fun verifyActivationOTP(
         @Body data: AccountVerificationOTP
-    ): Call<ResponModel>
+    ): Call<VerifyOTP>
 
     @GET("users")
     fun getUsers(): Call<UserResponse>
@@ -70,5 +70,10 @@ interface ApiService {
     @PATCH("users/profile")
     fun updateUser(
         @Body request: UpdateUserRequest
-    ): Call<UpdateUserProfileRespone>
+    ): Call<UpdateUserProfileResponse>
+
+    @PATCH("users/profile")
+    fun updateUserName(
+        @Body request: UpdateUserNameRequest
+    ): Call<UpdateUserProfileResponse>
 }
