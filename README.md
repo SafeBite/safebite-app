@@ -1,6 +1,6 @@
 # SafeBite
 <p float="left">
-  <img src="Screenshot Screen/home2.png" width="30" />
+  <img src="Screenshot Screen/home2.png" width="100" />
 </p>
 **What is Safebite?**
 **Safebite** is an Android-based food allergen detection application using Convolutional Neural Network. This application is expected to help in early prevention of food allergies.
