@@ -1,13 +1,15 @@
 # SafeBite
-![home2](https://github.com/user-attachments/assets/1e6973e0-6077-4246-9cb8-6ce2ae4a9688)
+<p float="left">
+  <img src="Screenshot Screen/home2.png" width="30" />
+</p>
 **What is Safebite?**
 **Safebite** is an Android-based food allergen detection application using Convolutional Neural Network. This application is expected to help in early prevention of food allergies.
 
 ## Login and Register Screen
-<p align="left">
-  <img alt="Light" src="![login](https://github.com/user-attachments/assets/4e9ed63c-3034-48a9-8f30-3a2a4b3a758e)" width="45%">
-&nbsp; &nbsp; &nbsp; &nbsp;
-  <img alt="Dark" src="![register](https://github.com/user-attachments/assets/f7a27f5b-e6dc-41c8-863e-2ed35809b06f)" width="45%">
+<p float="left">
+  <img src="/img1.png" width="30" />
+  <img src="/img2.png" width="30" /> 
+  <img src="/img3.png" width="30" />
 </p>
 This page is used to carry out the login and registration process.
 
